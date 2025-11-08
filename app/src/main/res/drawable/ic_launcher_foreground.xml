@@ -1,0 +1,101 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Book (bottom) - Left page -->
+    <path
+        android:pathData="M30,70 L30,85 Q30,87 32,87 L50,87 L50,63 Q50,61 48,61 L32,61 Q30,61 30,63 Z"
+        android:fillColor="#E9D5FF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5" />
+
+    <!-- Book (bottom) - Right page -->
+    <path
+        android:pathData="M78,70 L78,85 Q78,87 76,87 L58,87 L58,63 Q58,61 60,61 L76,61 Q78,61 78,63 Z"
+        android:fillColor="#E9D5FF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5" />
+
+    <!-- Book spine -->
+    <path
+        android:pathData="M50,61 L58,61 L58,87 L50,87 Z"
+        android:fillColor="#FFFFFF" />
+
+    <!-- Book lines -->
+    <path
+        android:pathData="M34,67 L46,67 M34,72 L46,72"
+        android:strokeColor="#C4B5FD"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M62,67 L74,67 M62,72 L74,72"
+        android:strokeColor="#C4B5FD"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round" />
+
+    <!-- Arrow connecting book to brain -->
+    <path
+        android:pathData="M54,52 L50,58 L52,58 L52,64 L56,64 L56,58 L58,58 Z"
+        android:fillColor="#FFFFFF" />
+
+    <!-- Brain outline -->
+    <path
+        android:pathData="M54,38 m-18,0 a18,16 0,1,1 36,0 a18,16 0,1,1 -36,0"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:fillColor="@android:color/transparent" />
+
+    <!-- Brain division -->
+    <path
+        android:pathData="M54,22 L54,54"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2" />
+
+    <!-- Brain curves (left hemisphere) -->
+    <path
+        android:pathData="M45,30 Q40,32 42,36"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M47,38 Q42,40 44,44"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+
+    <!-- Brain curves (right hemisphere) -->
+    <path
+        android:pathData="M63,30 Q68,32 66,36"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M61,38 Q66,40 64,44"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+
+    <!-- Neural connection dots (using small rectangles) -->
+    <path
+        android:pathData="M32,27 L36,27 L36,29 L32,29 Z M30,34 L34,34 L34,36 L30,36 Z M30,42 L34,42 L34,44 L30,44 Z M32,49 L36,49 L36,51 L32,51 Z"
+        android:fillColor="#FFFFFF" />
+
+    <path
+        android:pathData="M72,27 L76,27 L76,29 L72,29 Z M74,34 L78,34 L78,36 L74,36 Z M74,42 L78,42 L78,44 L74,44 Z M72,49 L76,49 L76,51 L72,51 Z"
+        android:fillColor="#FFFFFF" />
+
+    <!-- Connection lines from dots -->
+    <path
+        android:pathData="M34,28 L28,24 M32,35 L26,35 M32,43 L26,45 M34,50 L29,54 M74,28 L80,24 M76,35 L82,35 M76,43 L82,45 M74,50 L79,54"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5" />
+</vector>

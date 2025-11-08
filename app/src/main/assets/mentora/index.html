@@ -21,9 +21,12 @@
         
         // Handler for website extraction results
         window.handleWebResult = function(id, result) {
-            console.log('[AndroidBridge] Got result for request', id);
+            console.log('[AndroidBridge] Got result for request', id, result);
             const xhr = pendingXHR.get(id);
-            if (!xhr) return;
+            if (!xhr) {
+                console.error('[AndroidBridge] No XHR found for request', id);
+                return;
+            }
             
             const data = {
                 success: result.success || false,
@@ -36,19 +39,53 @@
                 }
             };
             
+            console.log('[AndroidBridge] Responding with:', data);
             const json = JSON.stringify(data);
+            
             Object.defineProperty(xhr, 'readyState', {writable: true, value: 4});
             Object.defineProperty(xhr, 'status', {writable: true, value: result.success ? 200 : 500});
+            Object.defineProperty(xhr, 'statusText', {writable: true, value: result.success ? 'OK' : 'Error'});
             Object.defineProperty(xhr, 'response', {writable: true, value: json});
             Object.defineProperty(xhr, 'responseText', {writable: true, value: json});
+            Object.defineProperty(xhr, 'responseType', {writable: true, value: ''});
             
-            xhr.getAllResponseHeaders = () => 'Content-Type: application/json';
-            xhr.getResponseHeader = (n) => n === 'content-type' ? 'application/json' : null;
+            xhr.getAllResponseHeaders = () => 'Content-Type: application/json\r\n';
+            xhr.getResponseHeader = (n) => n.toLowerCase() === 'content-type' ? 'application/json' : null;
             
-            if (xhr.onreadystatechange) xhr.onreadystatechange();
-            if (xhr.onload) xhr.onload();
+            console.log('[AndroidBridge] Triggering events...');
+            
+            // Trigger readystatechange first
+            if (xhr.onreadystatechange) {
+                try {
+                    xhr.onreadystatechange({type: 'readystatechange', target: xhr});
+                    console.log('[AndroidBridge] onreadystatechange triggered');
+                } catch(e) {
+                    console.error('[AndroidBridge] Error in onreadystatechange:', e);
+                }
+            }
+            
+            // Then trigger onload
+            if (xhr.onload) {
+                try {
+                    xhr.onload({type: 'load', target: xhr, currentTarget: xhr});
+                    console.log('[AndroidBridge] onload triggered');
+                } catch(e) {
+                    console.error('[AndroidBridge] Error in onload:', e);
+                }
+            }
+            
+            // Also try loadend
+            if (xhr.onloadend) {
+                try {
+                    xhr.onloadend({type: 'loadend', target: xhr});
+                    console.log('[AndroidBridge] onloadend triggered');
+                } catch(e) {
+                    console.error('[AndroidBridge] Error in onloadend:', e);
+                }
+            }
             
             pendingXHR.delete(id);
+            console.log('[AndroidBridge] Request', id, 'completed');
         };
         
         // Override XMLHttpRequest

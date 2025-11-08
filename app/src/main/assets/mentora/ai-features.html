@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools - Mentora</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #F9FAFB;
+            padding: 20px;
+            padding-bottom: 40px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: white;
+            color: #6366F1;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+        
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .tool-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .tool-card:active {
+            transform: scale(0.95);
+        }
+        
+        .tool-icon {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+        
+        .tool-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1F2937;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1F2937;
+        }
+        
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #F3F4F6;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 8px;
+        }
+        
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #6366F1;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        
+        .result-box {
+            margin-top: 20px;
+            padding: 16px;
+            background: #F0F9FF;
+            border-left: 4px solid #3B82F6;
+            border-radius: 8px;
+        }
+        
+        .result-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 8px;
+        }
+        
+        .result-text {
+            font-size: 14px;
+            color: #4B5563;
+            line-height: 1.6;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #E5E7EB;
+            border-top-color: #6366F1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .quiz-question {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 2px solid #E5E7EB;
+        }
+        
+        .question-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 12px;
+        }
+        
+        .option {
+            padding: 10px;
+            background: #F9FAFB;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .option:hover {
+            background: #E5E7EB;
+        }
+        
+        .flashcard {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .flashcard-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1F2937;
+        }
+    </style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Back to App</a>
+
+<div class="header">
+    <h1>🤖 AI Tools</h1>
+    <p>Powered by RunAnywhere SDK - All processing on-device</p>
+</div>
+
+<div class="tools-grid">
+    <div class="tool-card" onclick="openTool('translate')">
+        <div class="tool-icon">🌍</div>
+        <div class="tool-name">Translate</div>
+    </div>
+
+    <div class="tool-card" onclick="openTool('summarize')">
+        <div class="tool-icon">📝</div>
+        <div class="tool-name">Summarize</div>
+    </div>
+
+    <div class="tool-card" onclick="openTool('quiz')">
+        <div class="tool-icon">🎯</div>
+        <div class="tool-name">Quiz</div>
+    </div>
+
+    <div class="tool-card" onclick="openTool('chat')">
+        <div class="tool-icon">💬</div>
+        <div class="tool-name">Chat</div>
+    </div>
+
+    <div class="tool-card" onclick="openTool('flashcards')">
+        <div class="tool-icon">🎴</div>
+        <div class="tool-name">Flashcards</div>
+    </div>
+
+    <div class="tool-card" onclick="openTool('simplify')">
+        <div class="tool-icon">🧠</div>
+        <div class="tool-name">Simplify</div>
+    </div>
+
+    <div class="tool-card" onclick="openTool('notes')">
+        <div class="tool-icon">📚</div>
+        <div class="tool-name">Notes</div>
+    </div>
+
+    <div class="tool-card" onclick="openTool('status')">
+        <div class="tool-icon">ℹ️</div>
+        <div class="tool-name">Status</div>
+    </div>
+</div>
+
+<!-- Translate Modal -->
+<div id="translateModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">🌍 Translate Text</h2>
+            <button class="close-btn" onclick="closeModal('translateModal')">×</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Text to Translate</label>
+            <textarea class="form-textarea" id="translateText" placeholder="Enter text...">Hello, how are you?</textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Target Language</label>
+            <select class="form-select" id="translateLang">
+                <option value="Spanish">Spanish</option>
+                <option value="French">French</option>
+                <option value="German">German</option>
+                <option value="Italian">Italian</option>
+                <option value="Portuguese">Portuguese</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Chinese">Chinese</option>
+                <option value="Korean">Korean</option>
+            </select>
+        </div>
+        <button class="btn-primary" onclick="runTranslate()">
+            <span>✨</span> Translate
+        </button>
+        <div id="translateResult"></div>
+    </div>
+</div>
+
+<!-- Summarize Modal -->
+<div id="summarizeModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">📝 Summarize Text</h2>
+            <button class="close-btn" onclick="closeModal('summarizeModal')">×</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Text to Summarize</label>
+            <textarea class="form-textarea" id="summarizeText" placeholder="Enter long text...">Machine learning is a subset of artificial intelligence that enables computers to learn from data without being explicitly programmed. It uses algorithms that iteratively learn from data to improve predictions and decisions over time.</textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Max Length (words)</label>
+            <input type="number" class="form-input" id="summarizeLength" value="50">
+        </div>
+        <button class="btn-primary" onclick="runSummarize()">
+            <span>✨</span> Summarize
+        </button>
+        <div id="summarizeResult"></div>
+    </div>
+</div>
+
+<!-- Quiz Modal -->
+<div id="quizModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">🎯 Generate Quiz</h2>
+            <button class="close-btn" onclick="closeModal('quizModal')">×</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Content</label>
+            <textarea class="form-textarea" id="quizContent" placeholder="Enter lesson content...">The Pythagorean theorem states that in a right triangle, the square of the hypotenuse is equal to the sum of squares of the other two sides.</textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Number of Questions</label>
+            <input type="number" class="form-input" id="quizNum" value="3" min="1" max="10">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Difficulty</label>
+            <select class="form-select" id="quizDiff">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+        </div>
+        <button class="btn-primary" onclick="runQuiz()">
+            <span>✨</span> Generate Quiz
+        </button>
+        <div id="quizResult"></div>
+    </div>
+</div>
+
+<!-- Chat Modal -->
+<div id="chatModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">💬 AI Chat</h2>
+            <button class="close-btn" onclick="closeModal('chatModal')">×</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Your Question</label>
+            <textarea class="form-textarea" id="chatQuestion" placeholder="Ask anything...">What is machine learning?</textarea>
+        </div>
+        <button class="btn-primary" onclick="runChat()">
+            <span>✨</span> Ask AI
+        </button>
+        <div id="chatResult"></div>
+    </div>
+</div>
+
+<!-- Flashcards Modal -->
+<div id="flashcardsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">🎴 Generate Flashcards</h2>
+            <button class="close-btn" onclick="closeModal('flashcardsModal')">×</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Content</label>
+            <textarea class="form-textarea" id="flashcardsContent"
+                      placeholder="Enter lesson content...">Photosynthesis is the process by which plants convert sunlight into energy using chlorophyll.</textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Number of Cards</label>
+            <input type="number" class="form-input" id="flashcardsNum" value="5" min="1" max="20">
+        </div>
+        <button class="btn-primary" onclick="runFlashcards()">
+            <span>✨</span> Generate Flashcards
+        </button>
+        <div id="flashcardsResult"></div>
+    </div>
+</div>
+
+<!-- Simplify Modal -->
+<div id="simplifyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">🧠 Simplify Concept</h2>
+            <button class="close-btn" onclick="closeModal('simplifyModal')">×</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Concept</label>
+            <textarea class="form-textarea" id="simplifyConcept"
+                      placeholder="Enter complex concept...">Quantum entanglement</textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Target Age</label>
+            <input type="number" class="form-input" id="simplifyAge" value="12" min="5" max="18">
+        </div>
+        <button class="btn-primary" onclick="runSimplify()">
+            <span>✨</span> Simplify
+        </button>
+        <div id="simplifyResult"></div>
+    </div>
+</div>
+
+<!-- Notes Modal -->
+<div id="notesModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">📚 Generate Study Notes</h2>
+            <button class="close-btn" onclick="closeModal('notesModal')">×</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Content</label>
+            <textarea class="form-textarea" id="notesContent" placeholder="Enter lesson content...">The water cycle describes how water evaporates from the surface, rises into the atmosphere, cools and condenses into clouds, and falls back to the surface as precipitation.</textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Format</label>
+            <select class="form-select" id="notesFormat">
+                <option value="bullet">Bullet Points</option>
+                <option value="outline">Outline</option>
+                <option value="summary">Summary</option>
+            </select>
+        </div>
+        <button class="btn-primary" onclick="runNotes()">
+            <span>✨</span> Generate Notes
+        </button>
+        <div id="notesResult"></div>
+    </div>
+</div>
+
+<!-- Status Modal -->
+<div id="statusModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">ℹ️ AI Status</h2>
+            <button class="close-btn" onclick="closeModal('statusModal')">×</button>
+        </div>
+        <div id="statusResult"></div>
+    </div>
+</div>
+
+<script>
+
+    function openTool(toolName) {
+        closeAllModals();
+        document.getElementById(toolName + 'Modal').classList.add('active');
+        if (toolName === 'status') {
+            showStatus();
+        }
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    function closeAllModals() {
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    }
+
+    function showLoading(resultId) {
+        document.getElementById(resultId).innerHTML = `
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Processing...</p>
+            </div>
+        `;
+    }
+
+    function showResult(resultId, title, content) {
+        document.getElementById(resultId).innerHTML = `
+            <div class="result-box">
+                <div class="result-title">${title}</div>
+                <div class="result-text">${content}</div>
+            </div>
+        `;
+    }
+
+    function runTranslate() {
+        const text = document.getElementById('translateText').value;
+        const lang = document.getElementById('translateLang').value;
+        
+        showLoading('translateResult');
+        
+        if (window.Android && window.Android.translateText) {
+            let timeoutId;
+            let responded = false;
+            
+            timeoutId = setTimeout(() => {
+                if (!responded) {
+                    responded = true;
+                    showResult('translateResult', '✅ Translation (Mock - Model not ready)', 
+                        `${text} → Hola, ¿cómo estás? (Example ${lang} translation)`);
+                }
+            }, 3000);
+            
+            window.Android.translateText(text, lang, function(response) {
+                if (!responded) {
+                    responded = true;
+                    clearTimeout(timeoutId);
+                    if (response.success) {
+                        showResult('translateResult', '✅ Translation', response.translatedText);
+                    } else {
+                        showResult('translateResult', '✅ Translation (Mock)', 
+                            `Example ${lang} translation of: "${text}"`);
+                    }
+                }
+            });
+        } else {
+            setTimeout(() => {
+                showResult('translateResult', '✅ Translation (Mock)', 
+                    `Example ${lang} translation. In the Android app with AI model, this will be real translation.`);
+            }, 1000);
+        }
+    }
+
+    function runSummarize() {
+        const text = document.getElementById('summarizeText').value;
+        const maxLength = document.getElementById('summarizeLength').value;
+        
+        showLoading('summarizeResult');
+        
+        if (window.Android && window.Android.summarizeText) {
+            let timeoutId;
+            let responded = false;
+            
+            timeoutId = setTimeout(() => {
+                if (!responded) {
+                    responded = true;
+                    showResult('summarizeResult', '✅ Summary (Mock - Model not ready)', 
+                        'Machine learning enables computers to learn from data iteratively, improving predictions without explicit programming.');
+                }
+            }, 3000);
+            
+            window.Android.summarizeText(text, parseInt(maxLength), function(response) {
+                if (!responded) {
+                    responded = true;
+                    clearTimeout(timeoutId);
+                    if (response.success) {
+                        showResult('summarizeResult', '✅ Summary', response.summary);
+                    } else {
+                        showResult('summarizeResult', '✅ Summary (Mock)', 
+                            'Machine learning enables computers to learn from data iteratively.');
+                    }
+                }
+            });
+        } else {
+            setTimeout(() => {
+                showResult('summarizeResult', '✅ Summary (Mock)', 
+                    'This is a mock summary. In the Android app with AI model, this will be real summarization.');
+            }, 1000);
+        }
+    }
+
+    function runQuiz() {
+        const content = document.getElementById('quizContent').value;
+        const num = document.getElementById('quizNum').value;
+        const diff = document.getElementById('quizDiff').value;
+        
+        showLoading('quizResult');
+        
+        if (window.Android && window.Android.generateQuiz) {
+            let timeoutId;
+            let responded = false;
+            
+            timeoutId = setTimeout(() => {
+                if (!responded) {
+                    responded = true;
+                    const mockQuiz = `
+                        <div class="quiz-question">
+                            <div class="question-text">1. What does the Pythagorean theorem describe?</div>
+                            <div class="option">A. Relationship in right triangles</div>
+                            <div class="option">B. Circle properties</div>
+                            <div class="option">C. Linear equations</div>
+                            <div class="option">D. Exponential functions</div>
+                            <p style="margin-top: 12px; font-size: 12px; color: #10B981; font-weight: 600;">
+                                ✓ Answer: A
+                            </p>
+                        </div>
+                    `;
+                    document.getElementById('quizResult').innerHTML = '<div style="margin-top: 20px;"><p style="color: #F59E0B; margin-bottom: 12px;">⚠️ Mock quiz (AI model not ready)</p>' + mockQuiz + '</div>';
+                }
+            }, 3000);
+            
+            window.Android.generateQuiz(content, parseInt(num), diff, function(response) {
+                if (!responded) {
+                    responded = true;
+                    clearTimeout(timeoutId);
+                    if (response.success && response.quiz) {
+                        let html = '<div style="margin-top: 20px;">';
+                        response.quiz.forEach((q, i) => {
+                            html += `
+                                <div class="quiz-question">
+                                    <div class="question-text">${i + 1}. ${q.question}</div>
+                                    ${q.options.map((opt, j) => `
+                                        <div class="option">${String.fromCharCode(65 + j)}. ${opt}</div>
+                                    `).join('')}
+                                    <p style="margin-top: 12px; font-size: 12px; color: #10B981; font-weight: 600;">
+                                        ✓ Answer: ${q.correctAnswer}
+                                    </p>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        document.getElementById('quizResult').innerHTML = html;
+                    } else {
+                        const mockQuiz = `
+                            <div class="quiz-question">
+                                <div class="question-text">1. Sample Question?</div>
+                                <div class="option">A. Option 1</div>
+                                <div class="option">B. Option 2</div>
+                                <div class="option">C. Option 3</div>
+                                <div class="option">D. Option 4</div>
+                                <p style="margin-top: 12px; font-size: 12px; color: #10B981; font-weight: 600;">
+                                    ✓ Answer: A
+                                </p>
+                            </div>
+                        `;
+                        document.getElementById('quizResult').innerHTML = '<div style="margin-top: 20px;">' + mockQuiz + '</div>';
+                    }
+                }
+            });
+        } else {
+            setTimeout(() => {
+                const mockQuiz = `
+                    <div class="quiz-question">
+                        <div class="question-text">1. Sample Question?</div>
+                        <div class="option">A. Option 1</div>
+                        <div class="option">B. Option 2</div>
+                        <div class="option">C. Option 3</div>
+                        <div class="option">D. Option 4</div>
+                        <p style="margin-top: 12px; font-size: 12px; color: #10B981; font-weight: 600;">
+                            ✓ Answer: A
+                        </p>
+                    </div>
+                `;
+                document.getElementById('quizResult').innerHTML = '<div style="margin-top: 20px;">' + mockQuiz + '</div>';
+            }, 1000);
+        }
+    }
+
+    function runChat() {
+        const question = document.getElementById('chatQuestion').value;
+        
+        showLoading('chatResult');
+        
+        if (window.Android && window.Android.chatWithAI) {
+            let timeoutId;
+            let responded = false;
+            
+            // Set 3-second timeout for AI response
+            timeoutId = setTimeout(() => {
+                if (!responded) {
+                    responded = true;
+                    showResult('chatResult', '💬 AI Response (Mock - Model not ready)', 
+                        'Machine learning is a method of teaching computers to learn from data and make decisions without being explicitly programmed. It\'s like teaching a computer to recognize patterns, similar to how humans learn from experience. The more data it processes, the better it gets at making predictions.');
+                }
+            }, 3000);
+            
+            window.Android.chatWithAI(question, '', '', function(response) {
+                if (!responded) {
+                    responded = true;
+                    clearTimeout(timeoutId);
+                    if (response.success) {
+                        showResult('chatResult', '💬 AI Response', response.answer);
+                    } else {
+                        showResult('chatResult', '💬 AI Response (Mock)', 
+                            'Machine learning is a method of teaching computers to learn from data and make decisions without being explicitly programmed. It\'s like teaching a computer to recognize patterns.');
+                    }
+                }
+            });
+        } else {
+            setTimeout(() => {
+                showResult('chatResult', '💬 AI Response (Mock)', 
+                    'Machine learning is a method of teaching computers to learn from data and make decisions without being explicitly programmed. It\'s like teaching a computer to recognize patterns, similar to how humans learn from experience.');
+            }, 1000);
+        }
+    }
+
+    function runFlashcards() {
+        const content = document.getElementById('flashcardsContent').value;
+        const num = document.getElementById('flashcardsNum').value;
+
+        showLoading('flashcardsResult');
+
+        if (window.Android && window.Android.generateFlashcards) {
+            window.Android.generateFlashcards(content, parseInt(num), function(response) {
+                if (response.success && response.flashcards) {
+                    let html = '<div style="margin-top: 20px;">';
+                    response.flashcards.forEach((card, i) => {
+                        html += `
+                            <div class="flashcard" onclick="this.dataset.flipped = !this.dataset.flipped; this.textContent = this.dataset.flipped ? '${card.back}' : '${card.front}'">
+                                <div class="flashcard-text">${card.front}</div>
+                            </div>
+                        `;
+                    });
+                    html += '<p style="text-align: center; color: #6B7280; font-size: 14px;">Tap cards to flip</p></div>';
+                    document.getElementById('flashcardsResult').innerHTML = html;
+                } else {
+                    showResult('flashcardsResult', '❌ Error', response.error || 'Flashcard generation failed');
+                }
+            });
+        } else {
+            setTimeout(() => {
+                const mockCard = `
+                    <div class="flashcard" onclick="if(this.textContent.includes('Front')) this.innerHTML='<div class=\\'flashcard-text\\'>Back of Card (Mock)</div>'; else this.innerHTML='<div class=\\'flashcard-text\\'>Front of Card (Mock)</div>'">
+                        <div class="flashcard-text">Front of Card (Mock)</div>
+                    </div>
+                `;
+                document.getElementById('flashcardsResult').innerHTML = '<div style="margin-top: 20px;">' + mockCard + '<p style="text-align: center; color: #6B7280; font-size: 14px; margin-top: 12px;">Tap card to flip</p></div>';
+            }, 1000);
+        }
+    }
+
+    function runSimplify() {
+        const concept = document.getElementById('simplifyConcept').value;
+        const age = document.getElementById('simplifyAge').value;
+
+        showLoading('simplifyResult');
+
+        if (window.Android && window.Android.simplifyExplanation) {
+            window.Android.simplifyExplanation(concept, parseInt(age), function(response) {
+                if (response.success) {
+                    showResult('simplifyResult', '✅ Simplified Explanation', response.simplifiedText);
+                } else {
+                    showResult('simplifyResult', '❌ Error', response.error || 'Simplification failed');
+                }
+            });
+        } else {
+            setTimeout(() => {
+                showResult('simplifyResult', '✅ Simplified Explanation (Mock)',
+                    `This is a simplified explanation for age ${age}. In the Android app, this will use real AI simplification.`);
+            }, 1000);
+        }
+    }
+
+    function runNotes() {
+        const content = document.getElementById('notesContent').value;
+        const format = document.getElementById('notesFormat').value;
+
+        showLoading('notesResult');
+
+        if (window.Android && window.Android.generateStudyNotes) {
+            window.Android.generateStudyNotes(content, format, function(response) {
+                if (response.success) {
+                    showResult('notesResult', '✅ Study Notes', response.notes.replace(/\n/g, '<br>'));
+                } else {
+                    showResult('notesResult', '❌ Error', response.error || 'Notes generation failed');
+                }
+            });
+        } else {
+            setTimeout(() => {
+                showResult('notesResult', '✅ Study Notes (Mock)',
+                    `This is mock study notes in ${format} format. In the Android app, this will use real AI notes generation.`);
+            }, 1000);
+        }
+    }
+
+    function showStatus() {
+        if (window.Android && window.Android.getRunAnywhereAIStatus) {
+            try {
+                const status = JSON.parse(window.Android.getRunAnywhereAIStatus());
+                let html = '<div class="result-box">';
+                html += '<div class="result-title">🤖 AI Model Status</div>';
+                html += '<ul style="margin-top: 12px; padding-left: 20px;">';
+
+                for (let key in status) {
+                    html += `<li style="margin-bottom: 8px;"><strong>${key}:</strong> ${JSON.stringify(status[key])}</li>`;
+                }
+
+                html += '</ul></div>';
+                document.getElementById('statusResult').innerHTML = html;
+            } catch (e) {
+                showResult('statusResult', '❌ Error', 'Could not read AI status');
+            }
+        } else {
+            showResult('statusResult', 'ℹ️ Browser Mode',
+                'AI features are available in the Android app with the RunAnywhere SDK.');
+        }
+    }
+
+    // Close modal when clicking outside
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+});
+</script>
+</body>
+</html>

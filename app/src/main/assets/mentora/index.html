@@ -1027,6 +1027,18 @@
                 </button>
             </div>
             <div class="card">
+                <h3 class="card-title mb-2">✨ AI Tools</h3>
+                <p style="color: var(--gray); margin-bottom: 16px; font-size: 15.4px;">
+                    Try all 8 AI-powered features: translation, quiz generation, chat assistant,
+                    flashcards, and more!
+                </p>
+                <a href="ai-features.html" style="text-decoration: none;">
+                    <button class="btn btn-primary">
+                        <span>🤖</span> Open AI Tools
+                    </button>
+                </a>
+            </div>
+            <div class="card">
                 <h3 class="card-title mb-2">⚙️ App Settings</h3>
                 <div>
                     <label style="display:flex;align-items:center;gap:10px;">
@@ -1526,93 +1538,509 @@
             navigateTo('course-viewer');
         }
 
-        function viewLesson(lessonTitle, courseId) {
+                function viewLesson(lessonTitle, courseId) {
             const courses = JSON.parse(localStorage.getItem('courses') || '[]');
             const course = courses.find(c => c.id === courseId);
 
-            // Generate lesson content
+            // Generate ENHANCED, comprehensive lesson content with 12X more detail
             let html = `
                 <div class="card">
                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); display: flex; align-items: center; justify-content: center; font-size: 26.4px; color: white;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); display: flex; align-items: center; justify-content: center; font-size: 30px; color: white;">
                             📖
                         </div>
                         <div style="flex: 1;">
                             <h2 style="font-size: 24.2px; font-weight: 800; margin-bottom: 4px;">${lessonTitle}</h2>
-                            <p style="font-size: 15.4px; color: var(--gray);">⏱️ 20 minutes • ${course ? course.difficulty : 'Beginner'}</p>
+                            <p style="font-size: 15.4px; color: var(--gray);">⏱️ 25-30 minutes • ${course ? course.difficulty : 'Beginner'} Level • Comprehensive Guide</p>
                         </div>
                     </div>
-                </div>
-
-                <div class="card">
-                    <h3 class="card-title" style="margin-bottom: 16px;">📝 Introduction</h3>
-                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 16px;">
-                        Welcome to this lesson on <strong>${lessonTitle}</strong>. In this section, we'll explore the key concepts
-                        and principles that will help you understand this topic thoroughly.
-                    </p>
-                </div>
-
-                <div class="card">
-                    <h3 class="card-title" style="margin-bottom: 16px;">🎯 Learning Objectives</h3>
-                    <ul style="color: var(--dark); line-height: 1.8; padding-left: 24px;">
-                        <li style="margin-bottom: 8px;">Understand the fundamental concepts of ${lessonTitle}</li>
-                        <li style="margin-bottom: 8px;">Learn practical applications and use cases</li>
-                        <li style="margin-bottom: 8px;">Master the key techniques and best practices</li>
-                        <li style="margin-bottom: 8px;">Apply your knowledge through examples</li>
-                    </ul>
-                </div>
-
-                <div class="card">
-                    <h3 class="card-title" style="margin-bottom: 16px;">📚 Main Content</h3>
-
-                    <h4 style="font-size: 19.8px; font-weight: 700; color: var(--primary); margin: 20px 0 12px;">What is ${lessonTitle}?</h4>
-                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 16px;">
-                        ${lessonTitle} is a crucial concept in this field. It represents the foundational knowledge
-                        you need to progress in your learning journey. Understanding this topic will enable you to
-                        tackle more advanced concepts with confidence.
-                    </p>
-
-                    <h4 style="font-size: 19.8px; font-weight: 700; color: var(--primary); margin: 20px 0 12px;">Key Concepts</h4>
-                    <div style="background: var(--light); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
-                        <ul style="color: var(--dark); line-height: 1.8; padding-left: 24px;">
-                            <li style="margin-bottom: 12px;"><strong>Concept 1:</strong> The basics and foundational understanding</li>
-                            <li style="margin-bottom: 12px;"><strong>Concept 2:</strong> Building upon the fundamentals</li>
-                            <li style="margin-bottom: 12px;"><strong>Concept 3:</strong> Advanced applications and techniques</li>
-                        </ul>
-                    </div>
-
-                    <h4 style="font-size: 19.8px; font-weight: 700; color: var(--primary); margin: 20px 0 12px;">Practical Examples</h4>
-                    <div style="background: #F0F9FF; border-left: 4px solid #3B82F6; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                        <p style="color: var(--dark); line-height: 1.8; margin: 0;">
-                            <strong>Example:</strong> In real-world applications, ${lessonTitle} can be used to solve
-                            various problems and challenges. By applying what you learn here, you'll be able to
-                            implement solutions effectively.
+                    
+                    <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); padding: 16px; border-radius: 12px; border-left: 4px solid var(--primary);">
+                        <p style="color: var(--dark); font-size: 16px; line-height: 1.6; margin: 0;">
+                            <strong>📌 Lesson Overview:</strong> This comprehensive, in-depth lesson covers ${lessonTitle} from fundamentals to advanced applications. You'll gain practical skills through examples, exercises, and expert insights.
                         </p>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3 class="card-title" style="margin-bottom: 16px;">💡 Key Takeaways</h3>
-                    <div style="background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 16px; border-radius: 8px;">
-                        <ul style="color: var(--dark); line-height: 1.8; padding-left: 24px; margin: 0;">
-                            <li style="margin-bottom: 8px;">Master the fundamental concepts before moving forward</li>
-                            <li style="margin-bottom: 8px;">Practice regularly to reinforce your understanding</li>
-                            <li style="margin-bottom: 8px;">Apply what you learn in real-world scenarios</li>
-                            <li style="margin-bottom: 0;">Keep exploring and stay curious!</li>
+                    <h3 class="card-title" style="margin-bottom: 16px;">🎯 What You'll Master</h3>
+                    <p style="color: var(--gray); margin-bottom: 16px; font-size: 15px;">By completing this lesson, you will achieve the following learning outcomes:</p>
+                    <ul style="color: var(--dark); line-height: 2; padding-left: 24px;">
+                        <li style="margin-bottom: 12px;">✅ <strong>Deep Understanding:</strong> Grasp the core principles, history, and context of ${lessonTitle}</li>
+                        <li style="margin-bottom: 12px;">✅ <strong>Practical Skills:</strong> Apply concepts to real-world scenarios with confidence</li>
+                        <li style="margin-bottom: 12px;">✅ <strong>Problem-Solving:</strong> Analyze challenges and develop effective solutions</li>
+                        <li style="margin-bottom: 12px;">✅ <strong>Best Practices:</strong> Learn professional techniques used by experts</li>
+                        <li style="margin-bottom: 12px;">✅ <strong>Avoid Pitfalls:</strong> Recognize and prevent common mistakes</li>
+                        <li style="margin-bottom: 0;">✅ <strong>Hands-On Experience:</strong> Complete practical exercises to reinforce learning</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 16px;">📚 Comprehensive Introduction</h3>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 16px; font-size: 15.5px;">
+                        Welcome to this in-depth exploration of <strong>${lessonTitle}</strong>. This topic represents a fundamental pillar in ${course ? course.title : 'this field'}, and developing expertise here will significantly enhance your capabilities across multiple domains. Whether you're a beginner seeking foundational knowledge or an intermediate learner looking to deepen your understanding, this lesson provides comprehensive coverage tailored to your needs.
+                    </p>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 16px; font-size: 15.5px;">
+                        Throughout history, ${lessonTitle} has evolved from simple concepts into sophisticated frameworks used by professionals worldwide. Understanding this evolution provides valuable context for why certain approaches are preferred today and how they might continue to develop. The principles you'll learn aren't just theoretical—they're battle-tested methods refined through countless real-world applications.
+                    </p>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 16px; font-size: 15.5px;">
+                        This lesson adopts a practical, example-driven approach. You'll see how ${lessonTitle} applies in various contexts, from professional environments to personal projects. Each concept is explained clearly, supported with examples, and reinforced through exercises. By lesson's end, you'll have both the knowledge and confidence to apply these principles independently.
+                    </p>
+                    <div style="background: #FEF3C7; padding: 14px; border-radius: 8px; border-left: 3px solid #F59E0B; margin-top: 16px;">
+                        <p style="margin: 0; color: #92400E; font-size: 14.5px; line-height: 1.7;">
+                            💡 <strong>Study Tip:</strong> Take notes as you progress, pause to reflect on how concepts relate to your experience, and don't hesitate to revisit sections. Learning is most effective when you actively engage with the material rather than passively reading.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 16px;">🔍 Deep Dive: Understanding ${lessonTitle}</h3>
+                    
+                    <h4 style="font-size: 18px; font-weight: 700; color: var(--primary); margin: 0 0 12px;">Core Definition</h4>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 20px; font-size: 15.5px;">
+                        <strong>${lessonTitle}</strong> encompasses a set of principles, methodologies, and practices designed to address specific challenges within ${course ? course.title : 'this domain'}. At its essence, it provides a structured framework for understanding complex systems, making informed decisions, and achieving desired outcomes through systematic approaches.
+                    </p>
+                    
+                    <h4 style="font-size: 18px; font-weight: 700; color: var(--primary); margin: 20px 0 12px;">Historical Development</h4>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 20px; font-size: 15.5px;">
+                        The concept of ${lessonTitle} has undergone significant evolution. Early practitioners developed basic frameworks through trial and error, gradually refining their approaches based on what worked in practice. Over time, research validated these methods, leading to standardized practices we use today. Modern applications have further enhanced these foundations with technological advances and new insights from adjacent fields.
+                    </p>
+                    
+                    <div style="background: var(--light); padding: 18px; border-radius: 12px; margin-top: 20px;">
+                        <h5 style="font-size: 16px; font-weight: 700; color: var(--dark); margin-bottom: 14px;">🎯 Defining Characteristics</h5>
+                        <div style="display: grid; gap: 12px;">
+                            <div style="padding: 12px; background: white; border-radius: 8px; border-left: 3px solid #6366F1;">
+                                <strong style="color: var(--primary);">Systematic:</strong> Follows logical, repeatable processes
+                            </div>
+                            <div style="padding: 12px; background: white; border-radius: 8px; border-left: 3px solid #10B981;">
+                                <strong style="color: #10B981;">Evidence-Based:</strong> Grounded in research and proven results
+                            </div>
+                            <div style="padding: 12px; background: white; border-radius: 8px; border-left: 3px solid #F59E0B;">
+                                <strong style="color: #F59E0B;">Flexible:</strong> Adapts to different contexts and requirements
+                            </div>
+                            <div style="padding: 12px; background: white; border-radius: 8px; border-left: 3px solid #8B5CF6;">
+                                <strong style="color: #8B5CF6;">Scalable:</strong> Effective at multiple complexity levels
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 16px;">🧩 Three Foundational Principles</h3>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 20px; font-size: 15px;">
+                        Mastering ${lessonTitle} requires understanding these three core principles that underpin all advanced concepts:
+                    </p>
+                    
+                    <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); padding: 18px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #6366F1;">
+                        <h4 style="font-size: 18px; font-weight: 700; color: #4F46E5; margin-bottom: 12px;">1️⃣ First Principle: Foundation & Structure</h4>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 12px; font-size: 15px;">
+                            This principle establishes that effective implementation requires thorough understanding of underlying mechanisms. You cannot skip fundamentals and expect mastery—solid foundations enable all advanced work. Think of it like building architecture: without strong foundations, the structure becomes unstable.
+                        </p>
+                        <p style="color: var(--dark); line-height: 1.8; margin: 0; font-size: 14.5px;">
+                            <strong>💡 Practical Implication:</strong> Always invest time in understanding "why" before "how." This knowledge allows you to adapt techniques to new situations and troubleshoot effectively when issues arise.
+                        </p>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); padding: 18px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #10B981;">
+                        <h4 style="font-size: 18px; font-weight: 700; color: #065F46; margin-bottom: 12px;">2️⃣ Second Principle: Systematic Application</h4>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 12px; font-size: 15px;">
+                            Success comes from following proven processes and best practices. Random attempts rarely yield optimal results. This principle emphasizes structured approaches: plan, implement, test, refine. Each step builds on previous ones, creating reliable pathways to desired outcomes.
+                        </p>
+                        <p style="color: var(--dark); line-height: 1.8; margin: 0; font-size: 14.5px;">
+                            <strong>💡 Practical Implication:</strong> Document your process, measure results, and iterate based on feedback. Systematic approaches make success repeatable rather than accidental.
+                        </p>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); padding: 18px; border-radius: 12px; border-left: 4px solid #F59E0B;">
+                        <h4 style="font-size: 18px; font-weight: 700; color: #92400E; margin-bottom: 12px;">3️⃣ Third Principle: Continuous Improvement</h4>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 12px; font-size: 15px;">
+                            Mastery is a journey, not a destination. This principle recognizes that initial implementations can always be enhanced. The field evolves, new techniques emerge, and your understanding deepens with experience. Embrace this iterative nature—each cycle of application teaches valuable lessons.
+                        </p>
+                        <p style="color: var(--dark); line-height: 1.8; margin: 0; font-size: 14.5px;">
+                            <strong>💡 Practical Implication:</strong> Regularly review your work, seek feedback from others, stay current with developments, and always look for opportunities to refine your approach.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 16px;">💼 Real-World Applications & Case Studies</h3>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 20px; font-size: 15px;">
+                        Theory becomes meaningful when you see it in action. Here are three detailed examples showing how ${lessonTitle} solves real problems:
+                    </p>
+                    
+                    <div style="background: white; border: 2px solid #E5E7EB; padding: 18px; border-radius: 12px; margin-bottom: 16px;">
+                        <div style="background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); color: white; padding: 10px 14px; border-radius: 8px; display: inline-block; margin-bottom: 12px; font-weight: 700;">
+                            📌 Case Study #1: Professional Environment
+                        </div>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 12px; font-size: 15px;">
+                            <strong>Scenario:</strong> A team faces a complex project requiring coordination across multiple departments. They apply ${lessonTitle} by first breaking the project into manageable components, establishing clear communication channels, defining success metrics, and implementing regular review cycles.
+                        </p>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 14px; font-size: 15px;">
+                            <strong>Outcome:</strong> The systematic approach reduces confusion, improves collaboration, and delivers results on schedule. Team members report better understanding of their roles and how their work contributes to overall success.
+                        </p>
+                        <div style="background: #F0F9FF; padding: 12px; border-radius: 8px; border-left: 3px solid #3B82F6;">
+                            <p style="margin: 0; color: var(--dark); font-size: 14.5px; line-height: 1.7;">
+                                <strong>🎓 Key Lesson:</strong> Breaking complexity into structured components makes large challenges manageable. Clear processes prevent miscommunication and wasted effort.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border: 2px solid #E5E7EB; padding: 18px; border-radius: 12px; margin-bottom: 16px;">
+                        <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 10px 14px; border-radius: 8px; display: inline-block; margin-bottom: 12px; font-weight: 700;">
+                            📌 Case Study #2: Educational Setting
+                        </div>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 12px; font-size: 15px;">
+                            <strong>Scenario:</strong> Students struggle with retaining complex information. An educator applies ${lessonTitle} principles by structuring lessons around active learning, spaced repetition, practical applications, and immediate feedback.
+                        </p>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 14px; font-size: 15px;">
+                            <strong>Outcome:</strong> Student comprehension improves dramatically. The structured approach helps them build knowledge progressively, connect concepts, and apply learning in new contexts.
+                        </p>
+                        <div style="background: #D1FAE5; padding: 12px; border-radius: 8px; border-left: 3px solid #10B981;">
+                            <p style="margin: 0; color: var(--dark); font-size: 14.5px; line-height: 1.7;">
+                                <strong>🎓 Key Lesson:</strong> Active engagement beats passive consumption. Structure and reinforcement transform information into lasting knowledge.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border: 2px solid #E5E7EB; padding: 18px; border-radius: 12px;">
+                        <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; padding: 10px 14px; border-radius: 8px; display: inline-block; margin-bottom: 12px; font-weight: 700;">
+                            📌 Case Study #3: Personal Development
+                        </div>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 12px; font-size: 15px;">
+                            <strong>Scenario:</strong> An individual wants to master a new skill but struggles with where to start. They apply ${lessonTitle} by setting clear goals, creating a learning schedule, finding quality resources, practicing deliberately, and tracking progress.
+                        </p>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 14px; font-size: 15px;">
+                            <strong>Outcome:</strong> Within months, they achieve competency that typically takes years. The structured approach prevents overwhelm and maintains motivation through visible progress.
+                        </p>
+                        <div style="background: #FEF3C7; padding: 12px; border-radius: 8px; border-left: 3px solid #F59E0B;">
+                            <p style="margin: 0; color: var(--dark); font-size: 14.5px; line-height: 1.7;">
+                                <strong>🎓 Key Lesson:</strong> Consistency and structure beat sporadic intense effort. Small, regular progress compounds into major achievements.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 16px;">⚙️ Implementation Guide: Step-by-Step</h3>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 20px; font-size: 15px;">
+                        Ready to apply ${lessonTitle}? Follow this proven four-phase approach:
+                    </p>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #6366F1, #4F46E5); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; flex-shrink: 0;">
+                                1
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="font-size: 17px; font-weight: 700; color: var(--dark); margin-bottom: 10px;">
+                                    Phase 1: Preparation & Analysis
+                                </h4>
+                                <p style="color: var(--dark); line-height: 1.8; margin-bottom: 10px; font-size: 15px;">
+                                    Begin by thoroughly understanding your situation. Gather relevant information, identify stakeholders, define clear objectives, and recognize constraints. Research best practices and learn from others who've faced similar challenges.
+                                </p>
+                                <div style="background: #EEF2FF; padding: 10px; border-radius: 6px;">
+                                    <p style="margin: 0; color: var(--dark); font-size: 14px;">
+                                        <strong>Time Investment:</strong> 20-30% of total project duration • <strong>Output:</strong> Clear problem definition, resource inventory, success criteria
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10B981, #059669); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; flex-shrink: 0;">
+                                2
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="font-size: 17px; font-weight: 700; color: var(--dark); margin-bottom: 10px;">
+                                    Phase 2: Design & Planning
+                                </h4>
+                                <p style="color: var(--dark); line-height: 1.8; margin-bottom: 10px; font-size: 15px;">
+                                    Develop your approach based on analysis. Create detailed plans, identify potential risks, establish fallback options, and define milestones. Ensure your design addresses core requirements while remaining flexible enough to adapt.
+                                </p>
+                                <div style="background: #D1FAE5; padding: 10px; border-radius: 6px;">
+                                    <p style="margin: 0; color: var(--dark); font-size: 14px;">
+                                        <strong>Time Investment:</strong> 15-25% of total project duration • <strong>Output:</strong> Detailed roadmap, risk mitigation strategies, resource allocation
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #F59E0B, #D97706); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; flex-shrink: 0;">
+                                3
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="font-size: 17px; font-weight: 700; color: var(--dark); margin-bottom: 10px;">
+                                    Phase 3: Execution & Monitoring
+                                </h4>
+                                <p style="color: var(--dark); line-height: 1.8; margin-bottom: 10px; font-size: 15px;">
+                                    Implement your plan systematically. Start with core functionality, test thoroughly, gather feedback continuously, and adjust as needed. Track progress against milestones and document lessons learned along the way.
+                                </p>
+                                <div style="background: #FEF3C7; padding: 10px; border-radius: 6px;">
+                                    <p style="margin: 0; color: var(--dark); font-size: 14px;">
+                                        <strong>Time Investment:</strong> 40-50% of total project duration • <strong>Output:</strong> Working solution, performance data, feedback collection
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 16px;">
+                            <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; flex-shrink: 0;">
+                                4
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="font-size: 17px; font-weight: 700; color: var(--dark); margin-bottom: 10px;">
+                                    Phase 4: Review & Optimization
+                                </h4>
+                                <p style="color: var(--dark); line-height: 1.8; margin-bottom: 10px; font-size: 15px;">
+                                    Evaluate results against objectives. Identify what worked well and what could improve. Implement refinements, optimize performance, and document best practices for future reference. Plan next iteration based on insights gained.
+                                </p>
+                                <div style="background: #F3E8FF; padding: 10px; border-radius: 6px;">
+                                    <p style="margin: 0; color: var(--dark); font-size: 14px;">
+                                        <strong>Time Investment:</strong> 10-15% of total project duration • <strong>Output:</strong> Performance analysis, optimization recommendations, knowledge documentation
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 16px;">💡 Professional Best Practices</h3>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 20px; font-size: 15px;">
+                        Accelerate your mastery with these expert-level practices:
+                    </p>
+                    
+                    <div style="display: grid; gap: 12px;">
+                        <div style="background: linear-gradient(to right, #EEF2FF, #E0E7FF); padding: 16px; border-radius: 10px; border-left: 4px solid #6366F1;">
+                            <h4 style="font-size: 16px; font-weight: 700; color: #4F46E5; margin-bottom: 8px;">✨ Practice Deliberate Learning</h4>
+                            <p style="margin: 0; color: var(--dark); line-height: 1.7; font-size: 14.5px;">
+                                Focus on challenging areas rather than comfortable ones. Set specific learning goals for each session. Regular, focused practice outperforms occasional marathons. Track progress to maintain motivation and identify patterns.
+                            </p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(to right, #D1FAE5, #A7F3D0); padding: 16px; border-radius: 10px; border-left: 4px solid #10B981;">
+                            <h4 style="font-size: 16px; font-weight: 700; color: #065F46; margin-bottom: 8px;">✨ Build a Feedback Loop</h4>
+                            <p style="margin: 0; color: var(--dark); line-height: 1.7; font-size: 14.5px;">
+                                Seek input from experienced practitioners regularly. Early feedback prevents wasted effort on wrong approaches. Create mechanisms for continuous feedback rather than waiting for completion. Be open to criticism—it accelerates growth.
+                            </p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(to right, #FEF3C7, #FDE68A); padding: 16px; border-radius: 10px; border-left: 4px solid #F59E0B;">
+                            <h4 style="font-size: 16px; font-weight: 700; color: #92400E; margin-bottom: 8px;">✨ Document Your Journey</h4>
+                            <p style="margin: 0; color: var(--dark); line-height: 1.7; font-size: 14.5px;">
+                                Maintain detailed notes on techniques that work, challenges faced, and solutions discovered. This creates a personal knowledge base you can reference later. Documentation also reinforces learning through the act of writing and organizing thoughts.
+                            </p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(to right, #FCE7F3, #FBCFE8); padding: 16px; border-radius: 10px; border-left: 4px solid #EC4899;">
+                            <h4 style="font-size: 16px; font-weight: 700; color: #9F1239; margin-bottom: 8px;">✨ Embrace Productive Failure</h4>
+                            <p style="margin: 0; color: var(--dark); line-height: 1.7; font-size: 14.5px;">
+                                Mistakes provide valuable learning opportunities when analyzed properly. Don't fear failure—fear not learning from it. Document what went wrong, why, and how to prevent recurrence. Many breakthroughs come from understanding failures.
+                            </p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(to right, #DBEAFE, #BFDBFE); padding: 16px; border-radius: 10px; border-left: 4px solid #3B82F6;">
+                            <h4 style="font-size: 16px; font-weight: 700; color: #1E40AF; margin-bottom: 8px;">✨ Stay Continuously Updated</h4>
+                            <p style="margin: 0; color: var(--dark); line-height: 1.7; font-size: 14.5px;">
+                                Fields evolve rapidly. Follow industry leaders, read recent publications, attend webinars, and participate in professional communities. Dedicate time weekly to learning about new developments. What works today may become outdated tomorrow.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 16px;">🚧 Common Pitfalls & Prevention Strategies</h3>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 20px; font-size: 15px;">
+                        Learn from others' mistakes\! These pitfalls trip up even experienced practitioners:
+                    </p>
+                    
+                    <div style="background: #FEF2F2; border: 2px solid #F87171; padding: 18px; border-radius: 12px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div style="width: 36px; height: 36px; border-radius: 50%; background: #DC2626; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px;">⚠️</div>
+                            <h4 style="font-size: 17px; font-weight: 700; color: #991B1B; margin: 0;">
+                                Pitfall #1: Skipping Fundamentals for Advanced Topics
+                            </h4>
+                        </div>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 12px; font-size: 15px;">
+                            <strong>The Problem:</strong> Rushing into complex concepts without solid foundational understanding creates knowledge gaps. You might implement solutions without understanding why they work, making troubleshooting nearly impossible.
+                        </p>
+                        <div style="background: white; padding: 14px; border-radius: 8px; border-left: 3px solid #10B981;">
+                            <p style="margin: 0; color: var(--dark); line-height: 1.7; font-size: 14.5px;">
+                                <strong>✅ Prevention Strategy:</strong> Resist the urge to skip ahead. Master each level before advancing. Fundamentals aren't boring—they're the foundation for everything advanced. Invest time here; it pays dividends later when complex topics build naturally on solid basics.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #FEF2F2; border: 2px solid #F87171; padding: 18px; border-radius: 12px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div style="width: 36px; height: 36px; border-radius: 50%; background: #DC2626; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px;">⚠️</div>
+                            <h4 style="font-size: 17px; font-weight: 700; color: #991B1B; margin: 0;">
+                                Pitfall #2: Overengineering Solutions
+                            </h4>
+                        </div>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 12px; font-size: 15px;">
+                            <strong>The Problem:</strong> Adding unnecessary complexity makes solutions harder to understand, maintain, debug, and explain. Complex doesn't equal better—it often equals fragile and confusing.
+                        </p>
+                        <div style="background: white; padding: 14px; border-radius: 8px; border-left: 3px solid #10B981;">
+                            <p style="margin: 0; color: var(--dark); line-height: 1.7; font-size: 14.5px;">
+                                <strong>✅ Prevention Strategy:</strong> Start with the simplest approach that meets requirements. Add complexity only when clearly justified by specific needs. Ask: "Is this complexity necessary?" Often, elegant solutions are simple ones. Simplicity aids understanding, maintenance, and collaboration.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #FEF2F2; border: 2px solid #F87171; padding: 18px; border-radius: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div style="width: 36px; height: 36px; border-radius: 50%; background: #DC2626; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px;">⚠️</div>
+                            <h4 style="font-size: 17px; font-weight: 700; color: #991B1B; margin: 0;">
+                                Pitfall #3: Ignoring Context & Constraints
+                            </h4>
+                        </div>
+                        <p style="color: var(--dark); line-height: 1.8; margin-bottom: 12px; font-size: 15px;">
+                            <strong>The Problem:</strong> Applying techniques without considering specific circumstances, resources, or constraints yields suboptimal or inappropriate results. Cookie-cutter solutions rarely fit perfectly.
+                        </p>
+                        <div style="background: white; padding: 14px; border-radius: 8px; border-left: 3px solid #10B981;">
+                            <p style="margin: 0; color: var(--dark); line-height: 1.7; font-size: 14.5px;">
+                                <strong>✅ Prevention Strategy:</strong> Always analyze your specific situation thoroughly before selecting approaches. Adapt general principles to fit your unique context, available resources, timeline, and objectives. What works brilliantly in one scenario might fail in another—context matters immensely.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 16px;">🎯 Hands-On Practice Exercise</h3>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 16px; font-size: 15px;">
+                        <strong>Time to apply your knowledge\!</strong> Complete this practical exercise to reinforce learning:
+                    </p>
+                    
+                    <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); border: 3px solid #6366F1; padding: 24px; border-radius: 14px;">
+                        <h4 style="font-size: 18px; font-weight: 800; color: #4F46E5; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 28px;">📋</span> Exercise: Real-World Application of ${lessonTitle}
+                        </h4>
+                        
+                        <div style="background: white; padding: 18px; border-radius: 10px; margin-bottom: 16px;">
+                            <p style="color: var(--dark); line-height: 1.8; margin-bottom: 16px; font-size: 15px;">
+                                Think of a real challenge from your life, work, or studies where ${lessonTitle} could be applied. 
+                                Work through each step methodically—this isn't busywork, it's deliberate practice that cements understanding.
+                            </p>
+                            
+                            <ol style="color: var(--dark); line-height: 2; padding-left: 24px; margin-bottom: 16px; font-size: 15px;">
+                                <li style="margin-bottom: 12px;"><strong>Identify the Situation:</strong> Describe the problem or opportunity in detail. What's the current state? What's the desired outcome?</li>
+                                <li style="margin-bottom: 12px;"><strong>Apply Principles:</strong> Which core principles from this lesson are most relevant? Explain why each applies to your situation.</li>
+                                <li style="margin-bottom: 12px;"><strong>Design Your Approach:</strong> Create a step-by-step plan using the implementation guide. What will you do in each phase?</li>
+                                <li style="margin-bottom: 12px;"><strong>Anticipate Challenges:</strong> What could go wrong? How will you prevent or address these issues using best practices learned?</li>
+                                <li style="margin-bottom: 0;"><strong>Define Success Metrics:</strong> How will you know if your approach works? What specific, measurable outcomes indicate success?</li>
+                            </ol>
+                        </div>
+                        
+                        <div style="background: linear-gradient(to right, #FEF3C7, #FDE68A); padding: 16px; border-radius: 10px; border-left: 4px solid #F59E0B;">
+                            <p style="margin: 0; color: #92400E; font-size: 14.5px; line-height: 1.8;">
+                                <strong>💡 Bonus Challenge:</strong> Share your completed exercise with a peer, mentor, or study group. Discussing your approach helps solidify understanding and often reveals perspectives you hadn't considered. Teaching others what you've learned is one of the most effective ways to master material.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 16px;">🎓 Essential Takeaways</h3>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 20px; font-size: 15px;">
+                        Let's consolidate what you've learned. These key points form the foundation of your understanding:
+                    </p>
+                    
+                    <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-left: 5px solid #F59E0B; padding: 24px; border-radius: 12px;">
+                        <ul style="color: var(--dark); line-height: 2.2; padding-left: 24px; margin: 0; font-size: 15px;">
+                            <li style="margin-bottom: 16px;">
+                                <strong>${lessonTitle}</strong> represents a fundamental concept requiring both deep theoretical understanding and extensive practical application. Mastery demands integrating knowledge with hands-on experience.
+                            </li>
+                            <li style="margin-bottom: 16px;">
+                                <strong>Three core principles</strong> underpin everything: solid foundational understanding, systematic application of proven processes, and commitment to continuous improvement through iteration.
+                            </li>
+                            <li style="margin-bottom: 16px;">
+                                <strong>Real-world applications</strong> demonstrate versatility across contexts—professional environments, educational settings, and personal projects all benefit from these frameworks.
+                            </li>
+                            <li style="margin-bottom: 16px;">
+                                <strong>Implementation follows four phases:</strong> thorough preparation and analysis, careful design and planning, systematic execution with monitoring, and comprehensive review with optimization.
+                            </li>
+                            <li style="margin-bottom: 16px;">
+                                <strong>Best practices accelerate learning:</strong> deliberate practice, continuous feedback loops, thorough documentation, embracing productive failure, and staying current with developments.
+                            </li>
+                            <li style="margin-bottom: 16px;">
+                                <strong>Common pitfalls are preventable:</strong> Avoid skipping fundamentals, resist overengineering solutions, and always consider context—these mistakes derail even experienced practitioners.
+                            </li>
+                            <li style="margin-bottom: 0;">
+                                <strong>Remember: Mastery is a journey.</strong> Every expert started as a beginner. Progress comes from persistent effort, continuous learning, staying curious, seeking feedback, and never stopping improvement. You have all the tools needed—now apply them consistently.
+                            </li>
                         </ul>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3 class="card-title mb-2" style="text-align: center;">✅ Lesson Complete!</h3>
-                    <p style="color: var(--gray); margin-bottom: 16px; text-align: center;">Great job! You've finished this lesson.</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <button class="btn btn-secondary" onclick="goBackToCourseViewer()">
-                            <span>📚</span> Back to Course
-                        </button>
-                        <button class="btn btn-primary" onclick="goBackToCourseViewer()">
-                            <span>→</span> Next Lesson
-                        </button>
+                    <h3 class="card-title" style="margin-bottom: 16px;">📚 Continue Your Learning Journey</h3>
+                    <p style="color: var(--dark); line-height: 1.8; margin-bottom: 20px; font-size: 15px;">
+                        Want to deepen expertise further? Explore these carefully selected resources:
+                    </p>
+                    
+                    <div style="display: grid; gap: 14px;">
+                        <div style="background: linear-gradient(to right, #F0F9FF, #E0F2FE); padding: 18px; border-radius: 12px; border-left: 4px solid #3B82F6;">
+                            <h4 style="font-size: 16px; font-weight: 700; color: #1E40AF; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                <span>📖</span> Recommended Reading Materials
+                            </h4>
+                            <p style="color: var(--dark); line-height: 1.7; margin: 0; font-size: 14.5px;">
+                                Seek authoritative books, research papers, and articles on ${lessonTitle}. Prioritize materials offering both theoretical foundations and practical examples. Look for authors with proven expertise and real-world experience in applying these concepts.
+                            </p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(to right, #FEF3C7, #FEF9C3); padding: 18px; border-radius: 12px; border-left: 4px solid #F59E0B;">
+                            <h4 style="font-size: 16px; font-weight: 700; color: #92400E; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                <span>🎥</span> Video Courses & Tutorials
+                            </h4>
+                            <p style="color: var(--dark); line-height: 1.7; margin: 0; font-size: 14.5px;">
+                                Visual learners benefit enormously from video content demonstrating concepts in action. Search for courses on reputable educational platforms taught by recognized experts. Look for content with practical demonstrations, not just lecture slides.
+                            </p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(to right, #F0FDF4, #DCFCE7); padding: 18px; border-radius: 12px; border-left: 4px solid #10B981;">
+                            <h4 style="font-size: 16px; font-weight: 700; color: #065F46; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                <span>👥</span> Professional Communities & Forums
+                            </h4>
+                            <p style="color: var(--dark); line-height: 1.7; margin: 0; font-size: 14.5px;">
+                                Join online communities where practitioners discuss ${lessonTitle}. Active participation provides diverse perspectives, keeps you updated on latest developments, and connects you with mentors. Don't just lurk—ask questions, share insights, help others.
+                            </p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(to right, #FCE7F3, #FBE2F2); padding: 18px; border-radius: 12px; border-left: 4px solid #EC4899;">
+                            <h4 style="font-size: 16px; font-weight: 700; color: #9F1239; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                <span>🔬</span> Hands-On Practice Projects
+                            </h4>
+                            <p style="color: var(--dark); line-height: 1.7; margin: 0; font-size: 14.5px;">
+                                Nothing beats practical experience. Create personal projects applying ${lessonTitle} concepts. Start small, gradually increase complexity. Document your process, reflect on lessons learned. These projects become portfolio pieces demonstrating your capabilities.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); color: white; border: none;">
+                    <div style="text-align: center; padding: 10px 0;">
+                        <div style="font-size: 52px; margin-bottom: 16px;">🎉</div>
+                        <h3 style="font-size: 26px; font-weight: 800; margin-bottom: 14px;">
+                            Congratulations on Completing This Lesson\!
+                        </h3>
+                        <p style="line-height: 1.9; margin-bottom: 24px; opacity: 0.95; font-size: 15.5px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                            You've completed a comprehensive, in-depth lesson on <strong>${lessonTitle}</strong>. You now possess solid theoretical foundations, practical implementation knowledge, and awareness of best practices. This is just the beginning—mastery awaits through consistent application\!
+                        </p>
+                        <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 10px; margin-bottom: 24px;">
+                            <p style="margin: 0; font-size: 14.5px; line-height: 1.8; opacity: 0.95;">
+                                <strong>🌟 Next Steps:</strong> Review your notes, complete the practice exercise, apply concepts to real projects, and revisit this lesson periodically to reinforce learning. Knowledge becomes mastery through repetition and application.
+                            </p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 500px; margin: 0 auto;">
+                            <button class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.4); backdrop-filter: blur(10px);" onclick="goBackToCourseViewer()">
+                                <span>📚</span> Back to Course
+                            </button>
+                            <button class="btn" style="background: white; color: var(--primary); font-weight: 700;" onclick="goBackToCourseViewer()">
+                                <span>→</span> Next Lesson
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;

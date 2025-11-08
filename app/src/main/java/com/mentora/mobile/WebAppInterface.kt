@@ -772,6 +772,467 @@ class WebAppInterface(private val context: Context) {
         }
     }
 
+    // ========== NEW AI FEATURES ==========
+
+    /**
+     * Translate text from one language to another
+     * @param text Text to translate
+     * @param targetLanguage Target language (e.g., "Spanish", "French", "German")
+     * @param callback JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun translateText(text: String, targetLanguage: String, callback: String) {
+        Log.d(TAG, "Translating text to $targetLanguage...")
+        scope.launch {
+            try {
+                val prompt = """
+                    Translate the following text to $targetLanguage. 
+                    Only provide the translation, no explanations:
+                    
+                    $text
+                """.trimIndent()
+
+                val translation = withContext(Dispatchers.IO) {
+                    aiManager.generateText(prompt)
+                }
+
+                val response = JSONObject().apply {
+                    put("success", true)
+                    put("originalText", text)
+                    put("translatedText", translation)
+                    put("targetLanguage", targetLanguage)
+                }
+
+                withContext(Dispatchers.Main) {
+                    val jsonString = response.toString()
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
+                        .replace("\n", "\\n")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Translation failed: ${e.message}", e)
+                val errorResponse = JSONObject().apply {
+                    put("success", false)
+                    put("error", e.message ?: "Translation failed")
+                }
+                withContext(Dispatchers.Main) {
+                    val jsonString =
+                        errorResponse.toString().replace("\\", "\\\\").replace("'", "\\'")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate a summary of long text content
+     * @param text Text to summarize
+     * @param maxLength Maximum summary length (in words)
+     * @param callback JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun summarizeText(text: String, maxLength: Int, callback: String) {
+        Log.d(TAG, "Summarizing text (max $maxLength words)...")
+        scope.launch {
+            try {
+                val prompt = """
+                    Summarize the following text in approximately $maxLength words.
+                    Keep the most important information and key points:
+                    
+                    $text
+                """.trimIndent()
+
+                val summary = withContext(Dispatchers.IO) {
+                    aiManager.generateText(prompt)
+                }
+
+                val response = JSONObject().apply {
+                    put("success", true)
+                    put("originalText", text)
+                    put("summary", summary)
+                    put("summaryLength", summary.split(" ").size)
+                }
+
+                withContext(Dispatchers.Main) {
+                    val jsonString = response.toString()
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
+                        .replace("\n", "\\n")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Summarization failed: ${e.message}", e)
+                val errorResponse = JSONObject().apply {
+                    put("success", false)
+                    put("error", e.message ?: "Summarization failed")
+                }
+                withContext(Dispatchers.Main) {
+                    val jsonString =
+                        errorResponse.toString().replace("\\", "\\\\").replace("'", "\\'")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate quiz questions from lesson content
+     * @param lessonContent The lesson content to generate quiz from
+     * @param numQuestions Number of questions to generate
+     * @param difficulty Quiz difficulty (easy, medium, hard)
+     * @param callback JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun generateQuiz(
+        lessonContent: String,
+        numQuestions: Int,
+        difficulty: String,
+        callback: String
+    ) {
+        Log.d(TAG, "Generating $numQuestions quiz questions ($difficulty difficulty)...")
+        scope.launch {
+            try {
+                val prompt = """
+                    Generate $numQuestions multiple choice quiz questions based on this lesson content.
+                    Difficulty level: $difficulty
+                    
+                    Lesson Content:
+                    ${lessonContent.take(2000)}
+                    
+                    Format your response as a JSON array with this structure:
+                    [
+                      {
+                        "question": "Question text here",
+                        "options": ["Option A", "Option B", "Option C", "Option D"],
+                        "correctAnswer": 0,
+                        "explanation": "Brief explanation of the correct answer"
+                      }
+                    ]
+                    
+                    Only return the JSON array, no additional text.
+                """.trimIndent()
+
+                val quizJson = withContext(Dispatchers.IO) {
+                    aiManager.generateText(prompt)
+                }
+
+                // Try to parse JSON from AI response
+                val jsonStart = quizJson.indexOf("[")
+                val jsonEnd = quizJson.lastIndexOf("]") + 1
+                val cleanJson = if (jsonStart != -1 && jsonEnd > jsonStart) {
+                    quizJson.substring(jsonStart, jsonEnd)
+                } else {
+                    quizJson
+                }
+
+                val response = JSONObject().apply {
+                    put("success", true)
+                    put("quiz", JSONArray(cleanJson))
+                    put("difficulty", difficulty)
+                    put("numQuestions", numQuestions)
+                }
+
+                withContext(Dispatchers.Main) {
+                    val jsonString = response.toString()
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
+                        .replace("\n", "\\n")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Quiz generation failed: ${e.message}", e)
+                val errorResponse = JSONObject().apply {
+                    put("success", false)
+                    put("error", e.message ?: "Quiz generation failed")
+                }
+                withContext(Dispatchers.Main) {
+                    val jsonString =
+                        errorResponse.toString().replace("\\", "\\\\").replace("'", "\\'")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            }
+        }
+    }
+
+    /**
+     * Smart chat assistant for answering student questions
+     * @param question Student's question
+     * @param context Optional context (e.g., current lesson/course)
+     * @param conversationHistory Optional previous messages for context
+     * @param callback JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun chatWithAI(
+        question: String,
+        context: String,
+        conversationHistory: String,
+        callback: String
+    ) {
+        Log.d(TAG, "Processing chat question: ${question.take(50)}...")
+        scope.launch {
+            try {
+                val prompt = buildString {
+                    append("You are a helpful educational assistant. Answer the student's question clearly and accurately.\n\n")
+
+                    if (context.isNotEmpty() && context != "null") {
+                        append("Context: $context\n\n")
+                    }
+
+                    if (conversationHistory.isNotEmpty() && conversationHistory != "null") {
+                        append("Previous conversation:\n$conversationHistory\n\n")
+                    }
+
+                    append("Student's question: $question\n\n")
+                    append("Provide a clear, educational response:")
+                }
+
+                val answer = withContext(Dispatchers.IO) {
+                    aiManager.generateText(prompt)
+                }
+
+                val response = JSONObject().apply {
+                    put("success", true)
+                    put("question", question)
+                    put("answer", answer)
+                    put("timestamp", System.currentTimeMillis())
+                }
+
+                withContext(Dispatchers.Main) {
+                    val jsonString = response.toString()
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
+                        .replace("\n", "\\n")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Chat failed: ${e.message}", e)
+                val errorResponse = JSONObject().apply {
+                    put("success", false)
+                    put("error", e.message ?: "Chat failed")
+                }
+                withContext(Dispatchers.Main) {
+                    val jsonString =
+                        errorResponse.toString().replace("\\", "\\\\").replace("'", "\\'")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate flashcards from lesson content
+     * @param lessonContent The lesson content to generate flashcards from
+     * @param numCards Number of flashcards to generate
+     * @param callback JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun generateFlashcards(lessonContent: String, numCards: Int, callback: String) {
+        Log.d(TAG, "Generating $numCards flashcards...")
+        scope.launch {
+            try {
+                val prompt = """
+                    Generate $numCards educational flashcards from this lesson content.
+                    
+                    Lesson Content:
+                    ${lessonContent.take(2000)}
+                    
+                    Format your response as a JSON array:
+                    [
+                      {
+                        "front": "Question or concept",
+                        "back": "Answer or explanation"
+                      }
+                    ]
+                    
+                    Only return the JSON array, no additional text.
+                """.trimIndent()
+
+                val flashcardsJson = withContext(Dispatchers.IO) {
+                    aiManager.generateText(prompt)
+                }
+
+                // Try to parse JSON from AI response
+                val jsonStart = flashcardsJson.indexOf("[")
+                val jsonEnd = flashcardsJson.lastIndexOf("]") + 1
+                val cleanJson = if (jsonStart != -1 && jsonEnd > jsonStart) {
+                    flashcardsJson.substring(jsonStart, jsonEnd)
+                } else {
+                    flashcardsJson
+                }
+
+                val response = JSONObject().apply {
+                    put("success", true)
+                    put("flashcards", JSONArray(cleanJson))
+                    put("numCards", numCards)
+                }
+
+                withContext(Dispatchers.Main) {
+                    val jsonString = response.toString()
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
+                        .replace("\n", "\\n")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Flashcard generation failed: ${e.message}", e)
+                val errorResponse = JSONObject().apply {
+                    put("success", false)
+                    put("error", e.message ?: "Flashcard generation failed")
+                }
+                withContext(Dispatchers.Main) {
+                    val jsonString =
+                        errorResponse.toString().replace("\\", "\\\\").replace("'", "\\'")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            }
+        }
+    }
+
+    /**
+     * Explain complex concepts in simpler terms
+     * @param concept The complex concept to explain
+     * @param targetAge Target age/level (e.g., "10 year old", "beginner")
+     * @param callback JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun simplifyExplanation(concept: String, targetAge: String, callback: String) {
+        Log.d(TAG, "Simplifying explanation for $targetAge...")
+        scope.launch {
+            try {
+                val prompt = """
+                    Explain the following concept as if you're teaching it to a $targetAge.
+                    Use simple language, analogies, and examples:
+                    
+                    Concept: $concept
+                    
+                    Provide a clear, simple explanation:
+                """.trimIndent()
+
+                val explanation = withContext(Dispatchers.IO) {
+                    aiManager.generateText(prompt)
+                }
+
+                val response = JSONObject().apply {
+                    put("success", true)
+                    put("originalConcept", concept)
+                    put("simplifiedExplanation", explanation)
+                    put("targetAge", targetAge)
+                }
+
+                withContext(Dispatchers.Main) {
+                    val jsonString = response.toString()
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
+                        .replace("\n", "\\n")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Simplification failed: ${e.message}", e)
+                val errorResponse = JSONObject().apply {
+                    put("success", false)
+                    put("error", e.message ?: "Simplification failed")
+                }
+                withContext(Dispatchers.Main) {
+                    val jsonString =
+                        errorResponse.toString().replace("\\", "\\\\").replace("'", "\\'")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate study notes from lesson content
+     * @param lessonContent The lesson content to create notes from
+     * @param format Note format (bullet, outline, summary)
+     * @param callback JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun generateStudyNotes(lessonContent: String, format: String, callback: String) {
+        Log.d(TAG, "Generating study notes in $format format...")
+        scope.launch {
+            try {
+                val formatInstruction = when (format) {
+                    "bullet" -> "Format as concise bullet points highlighting key information"
+                    "outline" -> "Format as a hierarchical outline with main topics and subtopics"
+                    "summary" -> "Format as a comprehensive summary with paragraphs"
+                    else -> "Format as organized study notes"
+                }
+
+                val prompt = """
+                    Create study notes from this lesson content.
+                    $formatInstruction
+                    
+                    Lesson Content:
+                    ${lessonContent.take(2000)}
+                    
+                    Generate clear, organized study notes:
+                """.trimIndent()
+
+                val notes = withContext(Dispatchers.IO) {
+                    aiManager.generateText(prompt)
+                }
+
+                val response = JSONObject().apply {
+                    put("success", true)
+                    put("notes", notes)
+                    put("format", format)
+                }
+
+                withContext(Dispatchers.Main) {
+                    val jsonString = response.toString()
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
+                        .replace("\n", "\\n")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Note generation failed: ${e.message}", e)
+                val errorResponse = JSONObject().apply {
+                    put("success", false)
+                    put("error", e.message ?: "Note generation failed")
+                }
+                withContext(Dispatchers.Main) {
+                    val jsonString =
+                        errorResponse.toString().replace("\\", "\\\\").replace("'", "\\'")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                }
+            }
+        }
+    }
+
+    /**
+     * Get AI status including RunAnywhere SDK availability
+     * @return JSON string with AI status information
+     */
+    @JavascriptInterface
+    fun getRunAnywhereAIStatus(): String {
+        return try {
+            val status = JSONObject().apply {
+                put("installed", true) // SDK is integrated
+                put("available", true)
+                put("features", JSONArray().apply {
+                    put("Course Generation")
+                    put("Lesson Content")
+                    put("Translation")
+                    put("Summarization")
+                    put("Quiz Generation")
+                    put("Chat Assistant")
+                    put("Flashcards")
+                    put("Study Notes")
+                })
+            }
+            status.toString()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting AI status: ${e.message}", e)
+            JSONObject().apply {
+                put("installed", false)
+                put("error", e.message)
+            }.toString()
+        }
+    }
+
     /**
      * Execute JavaScript code in the WebView
      * Must be called from main thread

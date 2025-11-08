@@ -290,7 +290,8 @@ class WebAppInterface(private val context: Context) {
                 }
 
                 withContext(Dispatchers.Main) {
-                    executeJavaScript("$callback(${response.toString()})")
+                    val jsonString = response.toString().replace("\\", "\\\\").replace("'", "\\'")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
                 }
 
             } catch (e: Exception) {
@@ -301,7 +302,9 @@ class WebAppInterface(private val context: Context) {
                 }
 
                 withContext(Dispatchers.Main) {
-                    executeJavaScript("$callback(${errorResponse.toString()})")
+                    val jsonString =
+                        errorResponse.toString().replace("\\", "\\\\").replace("'", "\\'")
+                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
                 }
             }
         }

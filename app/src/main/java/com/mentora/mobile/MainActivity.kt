@@ -1,9 +1,11 @@
 package com.mentora.mobile
 
 import android.os.Bundle
+import android.util.Log
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.webkit.WebSettings
+import android.webkit.WebChromeClient
 import androidx.appcompat.app.AppCompatActivity
 import com.mentora.mobile.databinding.ActivityMainBinding
 
@@ -12,11 +14,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     internal lateinit var webView: WebView
 
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Enable WebView debugging
+        WebView.setWebContentsDebuggingEnabled(true)
+        Log.d(TAG, "WebView debugging enabled")
 
         setupWebView()
     }
@@ -43,11 +53,18 @@ class MainActivity : AppCompatActivity() {
         // Set WebViewClient to handle navigation within the WebView
         webView.webViewClient = WebViewClient()
 
+        // Set WebChromeClient for console logs
+        webView.webChromeClient = WebChromeClient()
+
         // Add JavaScript interface for native-web communication
-        webView.addJavascriptInterface(WebAppInterface(this), "Android")
+        val jsInterface = WebAppInterface(this)
+        webView.addJavascriptInterface(jsInterface, "Android")
+        Log.d(TAG, "JavaScript interface 'Android' added to WebView")
 
         // Load the local HTML file from assets
-        webView.loadUrl("file:///android_asset/mentora/index.html")
+        val url = "file:///android_asset/mentora/index.html"
+        Log.d(TAG, "Loading URL: $url")
+        webView.loadUrl(url)
     }
 
     override fun onBackPressed() {

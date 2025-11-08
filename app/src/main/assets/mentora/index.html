@@ -10,6 +10,18 @@
     <link rel="manifest" href="./manifest.json"/>
     <title>React App</title>
     <script>
+        // Test if Android interface is available
+        console.log('[AndroidTest] Page loaded!');
+        console.log('[AndroidTest] window.Android =', window.Android);
+        console.log('[AndroidTest] typeof window.Android =', typeof window.Android);
+        
+        if (window.Android) {
+            console.log('[AndroidTest] SUCCESS! Android interface is available!');
+            console.log('[AndroidTest] Has extractWebsiteContent?', typeof window.Android.extractWebsiteContent);
+        } else {
+            console.error('[AndroidTest] FAIL! window.Android is undefined!');
+        }
+        
         // Navigation Fix - Android Integration
         console.log('[AndroidBridge] Initializing...');
 
@@ -97,11 +109,15 @@
                         const requestId = requestIdCounter++;
                         pendingRequests.set(requestId, this);
                         
+                        // Create a callback function name dynamically
+                        const callbackName = 'handleWebExtraction_' + requestId;
+                        window[callbackName] = function(result) {
+                            window.handleWebsiteExtraction(requestId, result);
+                            delete window[callbackName]; // Clean up
+                        };
+                        
                         // Call Android method to extract website
-                        window.Android.extractWebsiteContent(
-                            websiteUrl,
-                            'window.handleWebsiteExtraction(' + requestId + ', arguments[0])'
-                        );
+                        window.Android.extractWebsiteContent(websiteUrl, callbackName);
                     } else {
                         // No URL provided, return mock/skip
                         console.log('[AndroidBridge] No URL provided, using mock data');

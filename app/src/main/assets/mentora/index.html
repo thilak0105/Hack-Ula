@@ -374,6 +374,140 @@
             return xhr;
         };
         
+        // ========== Callback Management System ==========
+        let callbackCounter = 0;
+        const callbackRegistry = {};
+
+        window.__registerCallback = function(fn) {
+            const id = '__callback_' + (callbackCounter++);
+            callbackRegistry[id] = fn;
+            window[id] = function(...args) {
+                try {
+                    fn(...args);
+                } finally {
+                    // Clean up after single use
+                    delete window[id];
+                    delete callbackRegistry[id];
+                }
+            };
+            return id;
+        };
+
+        window.__registerPersistentCallback = function(fn) {
+            const id = '__callback_' + (callbackCounter++);
+            callbackRegistry[id] = fn;
+            window[id] = fn;
+            return id;
+        };
+
+        // ========== Enhanced Android API Wrappers ==========
+        
+        // Wrap downloadModel to handle function callbacks
+        if (window.Android && window.Android.downloadModel) {
+            const originalDownloadModel = window.Android.downloadModel;
+            window.Android.downloadModel = function(modelId, progressCallback, completeCallback) {
+                console.log('[Bridge] downloadModel called with:', modelId);
+                
+                // If callbacks are functions, register them
+                const progressCbName = typeof progressCallback === 'function' 
+                    ? window.__registerPersistentCallback(progressCallback)
+                    : progressCallback;
+                
+                const completeCbName = typeof completeCallback === 'function'
+                    ? window.__registerCallback(completeCallback)
+                    : completeCallback;
+                
+                console.log('[Bridge] Registered callbacks:', progressCbName, completeCbName);
+                
+                // Call original with string names
+                return originalDownloadModel.call(this, modelId, progressCbName, completeCbName);
+            };
+        }
+
+        // Wrap getAvailableModels to handle function callbacks
+        if (window.Android && window.Android.getAvailableModels) {
+            const originalGetAvailableModels = window.Android.getAvailableModels;
+            window.Android.getAvailableModels = function(callback) {
+                console.log('[Bridge] getAvailableModels called');
+                
+                const callbackName = typeof callback === 'function'
+                    ? window.__registerCallback(callback)
+                    : callback;
+                
+                return originalGetAvailableModels.call(this, callbackName);
+            };
+        }
+
+        // Wrap loadModel to handle function callbacks
+        if (window.Android && window.Android.loadModel) {
+            const originalLoadModel = window.Android.loadModel;
+            window.Android.loadModel = function(modelId, callback) {
+                console.log('[Bridge] loadModel called with:', modelId);
+                
+                const callbackName = typeof callback === 'function'
+                    ? window.__registerCallback(callback)
+                    : callback;
+                
+                return originalLoadModel.call(this, modelId, callbackName);
+            };
+        }
+
+        // Wrap generateText to handle function callbacks
+        if (window.Android && window.Android.generateText) {
+            const originalGenerateText = window.Android.generateText;
+            window.Android.generateText = function(prompt, callback) {
+                console.log('[Bridge] generateText called');
+                
+                const callbackName = typeof callback === 'function'
+                    ? window.__registerCallback(callback)
+                    : callback;
+                
+                return originalGenerateText.call(this, prompt, callbackName);
+            };
+        }
+
+        // Wrap isModelLoaded to handle function callbacks
+        if (window.Android && window.Android.isModelLoaded) {
+            const originalIsModelLoaded = window.Android.isModelLoaded;
+            window.Android.isModelLoaded = function(callback) {
+                console.log('[Bridge] isModelLoaded called');
+                
+                const callbackName = typeof callback === 'function'
+                    ? window.__registerCallback(callback)
+                    : callback;
+                
+                return originalIsModelLoaded.call(this, callbackName);
+            };
+        }
+
+        // Wrap generateCourseContent to handle function callbacks
+        if (window.Android && window.Android.generateCourseContent) {
+            const originalGenerateCourseContent = window.Android.generateCourseContent;
+            window.Android.generateCourseContent = function(url, extractedText, courseTitle, difficulty, audience, prerequisites, callback) {
+                console.log('[Bridge] generateCourseContent called');
+                
+                const callbackName = typeof callback === 'function'
+                    ? window.__registerCallback(callback)
+                    : callback;
+                
+                return originalGenerateCourseContent.call(this, url, extractedText, courseTitle, difficulty, audience, prerequisites, callbackName);
+            };
+        }
+
+        // Wrap generateLessonContent to handle function callbacks
+        if (window.Android && window.Android.generateLessonContent) {
+            const originalGenerateLessonContent = window.Android.generateLessonContent;
+            window.Android.generateLessonContent = function(lessonTitle, lessonDescription, courseContext, callback) {
+                console.log('[Bridge] generateLessonContent called');
+                
+                const callbackName = typeof callback === 'function'
+                    ? window.__registerCallback(callback)
+                    : callback;
+                
+                return originalGenerateLessonContent.call(this, lessonTitle, lessonDescription, courseContext, callbackName);
+            };
+        }
+
         console.log('[AndroidBridge] Ready!');
     </script>
     <script defer="defer" src="./static/js/main.9dbe6570.js"></script>

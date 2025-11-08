@@ -2,24 +2,22 @@ package com.mentora.mobile
 
 import android.content.Context
 import android.webkit.JavascriptInterface
-import android.widget.Toast
+import android.webkit.WebView
 import android.util.Log
+import android.widget.Toast
 import com.mentora.mobile.ai.AIManager
 import com.mentora.mobile.utils.NetworkUtil
 import com.mentora.mobile.utils.PreferenceManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import kotlinx.coroutines.*
+import java.net.URL
+import org.jsoup.Jsoup
 
-/**
- * JavaScript interface for bidirectional communication between WebView and native Android
- */
 class WebAppInterface(private val context: Context) {
 
     private val aiManager = AIManager(context)
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val preferenceManager = PreferenceManager(context)
-    private val scope = CoroutineScope(Dispatchers.Main)
 
     companion object {
         private const val TAG = "WebAppInterface"
@@ -257,6 +255,92 @@ class WebAppInterface(private val context: Context) {
             } catch (e: Exception) {
                 Log.e(TAG, "Get current model failed: ${e.message}", e)
                 executeJavaScript("$callback(null)")
+            }
+        }
+    }
+
+    /**
+     * Fetch and extract text from a website URL
+     * @param url Website URL to extract content from
+     * @param callback JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun extractWebsiteContent(url: String, callback: String) {
+        Log.d(TAG, "Extracting content from URL: $url")
+
+        scope.launch(Dispatchers.IO) {
+            try {
+                // Fetch the website content
+                val doc = Jsoup.connect(url)
+                    .userAgent("Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36")
+                    .timeout(10000)
+                    .get()
+
+                // Extract text content
+                val title = doc.title()
+                val bodyText = doc.body().text()
+
+                // Create response
+                val response = JSONObject().apply {
+                    put("success", true)
+                    put("url", url)
+                    put("title", title)
+                    put("text", bodyText)
+                    put("length", bodyText.length)
+                }
+
+                withContext(Dispatchers.Main) {
+                    executeJavaScript("$callback(${response.toString()})")
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error extracting website content", e)
+                val errorResponse = JSONObject().apply {
+                    put("success", false)
+                    put("error", e.message ?: "Failed to extract content")
+                }
+
+                withContext(Dispatchers.Main) {
+                    executeJavaScript("$callback(${errorResponse.toString()})")
+                }
+            }
+        }
+    }
+
+    /**
+     * Extract text from uploaded file (PDF, TXT, etc.)
+     * @param fileUri File URI to extract content from
+     * @param callback JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun extractFileContent(fileUri: String, callback: String) {
+        Log.d(TAG, "Extracting content from file: $fileUri")
+
+        scope.launch(Dispatchers.IO) {
+            try {
+                // This would need PDF parsing library for PDFs
+                // For now, return a placeholder
+                val response = JSONObject().apply {
+                    put("success", true)
+                    put("fileUri", fileUri)
+                    put("text", "File extraction not yet implemented. Use website URL for now.")
+                    put("message", "PDF extraction requires additional library")
+                }
+
+                withContext(Dispatchers.Main) {
+                    executeJavaScript("$callback(${response.toString()})")
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error extracting file content", e)
+                val errorResponse = JSONObject().apply {
+                    put("success", false)
+                    put("error", e.message ?: "Failed to extract file content")
+                }
+
+                withContext(Dispatchers.Main) {
+                    executeJavaScript("$callback(${errorResponse.toString()})")
+                }
             }
         }
     }

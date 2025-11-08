@@ -631,7 +631,7 @@ class WebAppInterface(private val context: Context) {
 
         scope.launch {
             try {
-                // Step 1: Check for downloaded models and ensure one is loaded
+                // Step 1: Check for downloaded models
                 Log.d(TAG, "Checking for downloaded models...")
                 val modelsJson = withContext(Dispatchers.IO) {
                     aiManager.getAvailableModels()
@@ -639,38 +639,64 @@ class WebAppInterface(private val context: Context) {
 
                 val models = JSONArray(modelsJson)
                 var downloadedModelId: String? = null
+                var modelToDownload: String? = null
 
-                // Find first downloaded model
+                // Find first downloaded model or identify one to download
                 for (i in 0 until models.length()) {
                     val model = models.getJSONObject(i)
                     if (model.getBoolean("isDownloaded")) {
                         downloadedModelId = model.getString("id")
                         Log.d(TAG, "Found downloaded model: $downloadedModelId")
                         break
+                    } else if (modelToDownload == null) {
+                        modelToDownload = model.getString("id")
                     }
                 }
 
+                // If no model downloaded, download one first
                 if (downloadedModelId == null) {
-                    throw Exception("No AI model downloaded. Please generate a course first to download the model.")
-                }
+                    if (modelToDownload != null) {
+                        Log.d(TAG, "No model downloaded. Auto-downloading: $modelToDownload")
+                        showToast("Downloading AI model... This may take a few minutes.")
 
-                // Step 2: Try to load the model (it might not be in memory)
-                Log.d(TAG, "Attempting to load model: $downloadedModelId")
-                val loadSuccess = withContext(Dispatchers.IO) {
-                    try {
-                        aiManager.loadModel(downloadedModelId)
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Model load attempt failed, but continuing: ${e.message}")
-                        // Sometimes the model is already loaded, continue anyway
-                        true
+                        // Download the model
+                        withContext(Dispatchers.IO) {
+                            aiManager.downloadModel(modelToDownload).collect { progress ->
+                                val percentage = (progress * 100).toInt()
+                                Log.d(TAG, "Model download progress: $percentage%")
+                                if (percentage % 25 == 0) { // Show toast every 25%
+                                    withContext(Dispatchers.Main) {
+                                        showToast("Downloading model: $percentage%")
+                                    }
+                                }
+                            }
+                        }
+                        downloadedModelId = modelToDownload
+                        showToast("Model downloaded! Generating lesson content...")
+                        Log.d(TAG, "Model downloaded: $modelToDownload")
+                    } else {
+                        throw Exception("No AI models available. Please check your internet connection.")
                     }
                 }
 
-                if (!loadSuccess) {
-                    Log.w(TAG, "Model load returned false, but attempting generation anyway")
+                // Step 2: Load the model if not already loaded
+                Log.d(TAG, "Ensuring model is loaded: $downloadedModelId")
+                withContext(Dispatchers.IO) {
+                    try {
+                        val loadSuccess = aiManager.loadModel(downloadedModelId)
+                        if (loadSuccess) {
+                            Log.d(TAG, "Model loaded successfully")
+                        } else {
+                            Log.w(TAG, "Model load returned false, but continuing anyway")
+                        }
+                    } catch (e: Exception) {
+                        Log.w(
+                            TAG,
+                            "Model load threw exception (may already be loaded): ${e.message}"
+                        )
+                        // Continue anyway - model might already be loaded
+                    }
                 }
-
-                Log.d(TAG, "Model ready, proceeding with generation")
 
                 // Step 3: Create prompt for lesson content
                 val prompt = buildString {
@@ -701,8 +727,7 @@ class WebAppInterface(private val context: Context) {
                         aiManager.generateText(prompt)
                     } catch (e: Exception) {
                         Log.e(TAG, "Generation error: ${e.message}", e)
-                        // Return a formatted error message instead of crashing
-                        throw Exception("AI generation failed: ${e.message}. The model may need to be reloaded.")
+                        throw Exception("AI generation failed: ${e.message}. Please try again.")
                     }
                 }
 

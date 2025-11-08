@@ -100,7 +100,7 @@
                         // Call Android method to extract website
                         window.Android.extractWebsiteContent(
                             websiteUrl,
-                            `handleWebsiteExtraction.bind(null, ${requestId})`
+                            'window.handleWebsiteExtraction(' + requestId + ', arguments[0])'
                         );
                     } else {
                         // No URL provided, return mock/skip

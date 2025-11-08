@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Mentora</string>
+    <string name="app_name">Mentora Mobile</string>
+
+    <!-- Navigation Items -->
+    <string name="nav_courses">Courses</string>
+    <string name="nav_upload">Upload</string>
+    <string name="nav_learner">Learner</string>
+    <string name="nav_learning_path">Learning Path</string>
+    <string name="nav_examine">Examine</string>
+    <string name="nav_outcome">Outcome</string>
+
+    <!-- Section Titles -->
+    <string name="title_courses">My Courses</string>
+    <string name="title_upload">Upload Content</string>
+    <string name="title_learner">Learner Profile</string>
+    <string name="title_learning_path">Learning Paths</string>
+    <string name="title_examine">Examinations</string>
+    <string name="title_outcome">Learning Outcomes</string>
 </resources>

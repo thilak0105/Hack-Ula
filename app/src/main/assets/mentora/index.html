@@ -131,17 +131,66 @@
             xhr.send = function(data) {
                 if (!this._intercept) return realSend.call(this, data);
                 
-                console.log('[AndroidBridge] Handling intercepted request');
+                console.log('[AndroidBridge] Handling intercepted request:', this._url);
                 
                 let url = null;
                 if (data && data.get) url = data.get('url');
                 
-                // Check if this is a course generation request (not just upload)
+                // Check if this is a lesson content request
+                const isLessonContent = this._url.includes('lesson-content') || this._url.includes('/lessons/');
+                
+                // Check if this is a course generation request
                 const isCourseGeneration = this._url.includes('generate') || 
                                           this._url.includes('course') ||
-                                          (!url && data); // Has data but no URL means it's generation
+                                          (!url && data && !isLessonContent);
                 
-                if (isCourseGeneration && window.Android && window.Android.generateCourseContent) {
+                if (isLessonContent && window.Android && window.Android.generateLessonContent) {
+                    // Generate lesson content using AI
+                    console.log('[AndroidBridge] Generating lesson content with AI...');
+                    
+                    let lessonInfo = {
+                        title: '',
+                        description: '',
+                        context: ''
+                    };
+                    
+                    if (data && data.get) {
+                        lessonInfo.title = data.get('title') || data.get('lessonTitle') || 'Lesson';
+                        lessonInfo.description = data.get('description') || data.get('lessonDescription') || '';
+                        lessonInfo.context = data.get('context') || data.get('courseContext') || '';
+                    }
+                    
+                    console.log('[AndroidBridge] Lesson Info:', lessonInfo);
+                    
+                    const callbackName = 'lessonContentCallback_' + Date.now();
+                    window[callbackName] = function(response) {
+                        console.log('[AndroidBridge] Lesson content response:', response);
+                        
+                        const json = JSON.stringify(response);
+                        Object.defineProperty(this, 'readyState', {writable: true, value: 4});
+                        Object.defineProperty(this, 'status', {writable: true, value: response.success ? 200 : 500});
+                        Object.defineProperty(this, 'response', {writable: true, value: json});
+                        Object.defineProperty(this, 'responseText', {writable: true, value: json});
+                        
+                        this.getAllResponseHeaders = () => 'Content-Type: application/json\r\n';
+                        this.getResponseHeader = () => 'application/json';
+                        
+                        if (this.onreadystatechange) this.onreadystatechange({type: 'readystatechange', target: this});
+                        if (this.onload) this.onload({type: 'load', target: this});
+                        if (this.onloadend) this.onloadend({type: 'loadend', target: this});
+                        
+                        console.log('[AndroidBridge] Lesson content generation complete!');
+                        delete window[callbackName];
+                    }.bind(this);
+                    
+                    window.Android.generateLessonContent(
+                        lessonInfo.title,
+                        lessonInfo.description,
+                        lessonInfo.context,
+                        callbackName
+                    );
+                    
+                } else if (isCourseGeneration && window.Android && window.Android.generateCourseContent) {
                     // Use the unified course generation method
                     console.log('[AndroidBridge] Generating course with AI using unified method...');
                     
@@ -247,6 +296,7 @@
                         
                         if (this.onreadystatechange) this.onreadystatechange({type: 'readystatechange', target: this});
                         if (this.onload) this.onload({type: 'load', target: this});
+                        if (this.onloadend) this.onloadend({type: 'loadend', target: this});
                         
                         console.log('[AndroidBridge] Course generation complete!');
                         delete window[callbackName];

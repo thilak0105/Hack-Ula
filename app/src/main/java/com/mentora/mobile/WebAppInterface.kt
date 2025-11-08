@@ -417,47 +417,76 @@ class WebAppInterface(private val context: Context) {
                     contentText = extractResult.second
                 }
 
-                // Step 2: Check if model is loaded, if not load one
+                // Step 2: Check if model is downloaded, if not download it
+                Log.d(TAG, "Checking for downloaded models...")
+                val modelsJson = withContext(Dispatchers.IO) {
+                    aiManager.getAvailableModels()
+                }
+
+                val models = JSONArray(modelsJson)
+                var downloadedModelId: String? = null
+                var needsDownload = false
+                var modelToDownload: String? = null
+
+                // Find first downloaded model or identify one to download
+                for (i in 0 until models.length()) {
+                    val model = models.getJSONObject(i)
+                    if (model.getBoolean("isDownloaded")) {
+                        downloadedModelId = model.getString("id")
+                        break
+                    } else if (modelToDownload == null) {
+                        modelToDownload = model.getString("id")
+                    }
+                }
+
+                // If no model downloaded, download one
+                if (downloadedModelId == null && modelToDownload != null) {
+                    Log.d(TAG, "No model downloaded. Auto-downloading: $modelToDownload")
+                    needsDownload = true
+
+                    // Notify user that download is starting
+                    showToast("Downloading AI model (first time only)...")
+
+                    // Download the model
+                    withContext(Dispatchers.IO) {
+                        aiManager.downloadModel(modelToDownload).collect { progress ->
+                            val percentage = (progress * 100).toInt()
+                            Log.d(TAG, "Model download progress: $percentage%")
+                            if (percentage % 20 == 0) { // Show toast every 20%
+                                withContext(Dispatchers.Main) {
+                                    showToast("Downloading model: $percentage%")
+                                }
+                            }
+                        }
+                    }
+                    downloadedModelId = modelToDownload
+                    showToast("Model downloaded successfully!")
+                    Log.d(TAG, "Model downloaded: $modelToDownload")
+                }
+
+                // Step 3: Check if model is loaded, if not load one
                 Log.d(TAG, "Checking if AI model is loaded...")
                 val modelLoaded = withContext(Dispatchers.IO) {
                     aiManager.isModelLoaded()
                 }
 
                 if (!modelLoaded) {
-                    Log.d(TAG, "No model loaded, loading default model...")
-                    // Try to load the first available downloaded model
-                    val modelsJson = withContext(Dispatchers.IO) {
-                        aiManager.getAvailableModels()
-                    }
-
-                    val models = JSONObject("{\"models\": $modelsJson}").getJSONArray("models")
-                    var modelId: String? = null
-
-                    // Find first downloaded model
-                    for (i in 0 until models.length()) {
-                        val model = models.getJSONObject(i)
-                        if (model.getBoolean("isDownloaded")) {
-                            modelId = model.getString("id")
-                            break
-                        }
-                    }
-
-                    if (modelId != null) {
-                        Log.d(TAG, "Loading model: $modelId")
+                    if (downloadedModelId != null) {
+                        Log.d(TAG, "Loading model: $downloadedModelId")
                         val loadSuccess = withContext(Dispatchers.IO) {
-                            aiManager.loadModel(modelId)
+                            aiManager.loadModel(downloadedModelId)
                         }
 
                         if (!loadSuccess) {
-                            throw Exception("Failed to load model: $modelId")
+                            throw Exception("Failed to load model: $downloadedModelId")
                         }
                         Log.d(TAG, "Model loaded successfully!")
                     } else {
-                        throw Exception("No downloaded models available. Please download a model first from Settings.")
+                        throw Exception("No models available. Please check your internet connection and try again.")
                     }
                 }
 
-                // Step 3: Create prompt for AI
+                // Step 4: Create prompt for AI
                 val truncatedContent = if (contentText.length > 2000) {
                     contentText.substring(0, 2000) + "..."
                 } else {
@@ -500,14 +529,14 @@ class WebAppInterface(private val context: Context) {
                 Log.d(TAG, "Generating course with AI...")
                 Log.d(TAG, "Prompt length: ${prompt.length} characters")
 
-                // Step 4: Generate course using AI
+                // Step 5: Generate course using AI
                 val aiResponse = withContext(Dispatchers.IO) {
                     aiManager.generateText(prompt)
                 }
 
                 Log.d(TAG, "AI Response received: ${aiResponse.take(200)}...")
 
-                // Step 5: Parse AI response and format for frontend
+                // Step 6: Parse AI response and format for frontend
                 val courseData = try {
                     // Try to find JSON in the response
                     val jsonStart = aiResponse.indexOf("{")
@@ -547,13 +576,16 @@ class WebAppInterface(private val context: Context) {
                     }
                 }
 
-                // Step 6: Create response
+                // Step 7: Create response
                 val response = JSONObject().apply {
                     put("success", true)
                     put("course_id", "ai-${System.currentTimeMillis()}")
                     put("extracted_text", contentText)
                     put("course", courseData)
-                    put("message", "Course generated successfully using on-device AI")
+                    put(
+                        "message",
+                        if (needsDownload) "Course generated successfully! Model was downloaded." else "Course generated successfully using on-device AI"
+                    )
                 }
 
                 withContext(Dispatchers.Main) {
@@ -561,7 +593,7 @@ class WebAppInterface(private val context: Context) {
                         .replace("\\", "\\\\")
                         .replace("'", "\\'")
                         .replace("\n", "\\n")
-                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                    executeJavaScript("if(typeof window.$callback === 'function') { window.$callback(JSON.parse('$jsonString')); }")
                 }
 
                 Log.d(TAG, "Course generation completed successfully!")
@@ -578,13 +610,114 @@ class WebAppInterface(private val context: Context) {
                     val jsonString = errorResponse.toString()
                         .replace("\\", "\\\\")
                         .replace("'", "\\'")
-                    executeJavaScript("window.$callback(JSON.parse('$jsonString'))")
+                    executeJavaScript("if(typeof window.$callback === 'function') { window.$callback(JSON.parse('$jsonString')); }")
                 }
             }
         }
     }
 
-    // ========== Helper Methods ==========
+    /**
+     * Generate detailed lesson content for a specific lesson
+     * Called when user clicks "Read" button on a lesson
+     */
+    @JavascriptInterface
+    fun generateLessonContent(
+        lessonTitle: String,
+        lessonDescription: String,
+        courseContext: String,
+        callback: String
+    ) {
+        Log.d(TAG, "Generating lesson content for: $lessonTitle")
+
+        scope.launch {
+            try {
+                // Ensure model is loaded
+                val modelLoaded = withContext(Dispatchers.IO) {
+                    aiManager.isModelLoaded()
+                }
+
+                if (!modelLoaded) {
+                    // Try to load first downloaded model
+                    val modelsJson = withContext(Dispatchers.IO) {
+                        aiManager.getAvailableModels()
+                    }
+                    val models = JSONArray(modelsJson)
+                    var modelId: String? = null
+
+                    for (i in 0 until models.length()) {
+                        val model = models.getJSONObject(i)
+                        if (model.getBoolean("isDownloaded")) {
+                            modelId = model.getString("id")
+                            break
+                        }
+                    }
+
+                    if (modelId != null) {
+                        withContext(Dispatchers.IO) {
+                            aiManager.loadModel(modelId)
+                        }
+                    } else {
+                        throw Exception("No AI model available. Please generate a course first.")
+                    }
+                }
+
+                // Create prompt for lesson content
+                val prompt = buildString {
+                    append("Generate detailed lesson content for:\n\n")
+                    append("Lesson Title: $lessonTitle\n")
+                    append("Lesson Description: $lessonDescription\n")
+                    if (courseContext.isNotEmpty()) {
+                        append("Course Context: $courseContext\n\n")
+                    }
+                    append("\nCreate comprehensive lesson content with:\n")
+                    append("1. Introduction (2-3 paragraphs)\n")
+                    append("2. Main concepts (detailed explanation)\n")
+                    append("3. Examples and practical applications\n")
+                    append("4. Key takeaways\n")
+                    append("5. Summary\n\n")
+                    append("Write in a clear, educational style suitable for learning.")
+                }
+
+                Log.d(TAG, "Generating lesson content with AI...")
+
+                // Generate content
+                val lessonContent = withContext(Dispatchers.IO) {
+                    aiManager.generateText(prompt)
+                }
+
+                Log.d(TAG, "Lesson content generated: ${lessonContent.length} characters")
+
+                // Create response
+                val response = JSONObject().apply {
+                    put("success", true)
+                    put("lessonTitle", lessonTitle)
+                    put("content", lessonContent)
+                }
+
+                withContext(Dispatchers.Main) {
+                    val jsonString = response.toString()
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
+                        .replace("\n", "\\n")
+                    executeJavaScript("if(typeof window.$callback === 'function') { window.$callback(JSON.parse('$jsonString')); }")
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error generating lesson content", e)
+                val errorResponse = JSONObject().apply {
+                    put("success", false)
+                    put("error", e.message ?: "Failed to generate lesson content")
+                }
+
+                withContext(Dispatchers.Main) {
+                    val jsonString = errorResponse.toString()
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
+                    executeJavaScript("if(typeof window.$callback === 'function') { window.$callback(JSON.parse('$jsonString')); }")
+                }
+            }
+        }
+    }
 
     /**
      * Execute JavaScript code in the WebView

@@ -3,12 +3,201 @@
 <head>
     <meta charset="utf-8"/>
     <link rel="icon" href="./favicon.ico"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="theme-color" content="#000000"/>
-    <meta name="description" content="Web site created using create-react-app"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+    <meta name="theme-color" content="#6366F1"/>
+    <meta name="description" content="Mentora Mobile - AI-Powered Course Generator"/>
     <link rel="apple-touch-icon" href="./logo192.png"/>
     <link rel="manifest" href="./manifest.json"/>
-    <title>React App</title>
+    <title>Mentora Mobile</title>
+
+    <style>
+        /* ========== RESPONSIVE FIXES & MOBILE-FIRST STYLING ========== */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 
+                         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        #root {
+            width: 100%;
+            min-height: 100vh;
+            padding-bottom: 70px; /* Space for bottom navigation */
+            background: #F9FAFB;
+        }
+        
+        /* Fix container widths */
+        .container, .main-container, [class*="container"] {
+            max-width: 100vw !important;
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+        
+        /* Responsive images */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Fix forms and inputs */
+        input, textarea, select, button {
+            max-width: 100%;
+            font-size: 16px; /* Prevents zoom on iOS */
+        }
+        
+        /* ========== BOTTOM NAVIGATION ========== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            padding: 0 4px;
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #9CA3AF;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            min-width: 0;
+        }
+        
+        .nav-item:active {
+            background: #F3F4F6;
+        }
+        
+        .nav-item.active {
+            color: #6366F1;
+        }
+        
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        
+        /* ========== SECTION CONTAINERS ========== */
+        .section {
+            display: none;
+            padding: 16px;
+            min-height: calc(100vh - 70px);
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .section-header {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 16px;
+            padding-top: 8px;
+        }
+        
+        /* ========== CARD STYLING ========== */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* ========== RESPONSIVE BREAKPOINTS ========== */
+        @media (max-width: 768px) {
+            .section {
+                padding: 12px;
+            }
+            
+            .section-header {
+                font-size: 20px;
+            }
+            
+            .nav-label {
+                font-size: 10px;
+            }
+            
+            .nav-icon {
+                font-size: 20px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .bottom-nav {
+                height: 60px;
+            }
+            
+            #root {
+                padding-bottom: 60px;
+            }
+            
+            .nav-icon {
+                font-size: 18px;
+                margin-bottom: 2px;
+            }
+            
+            .nav-label {
+                font-size: 9px;
+            }
+        }
+        
+        /* Hide original React root initially for smooth transition */
+        #root > div {
+            max-width: 100% !important;
+        }
+    </style>
+
     <script>
         // Android Bridge - Must load BEFORE React app
         console.log('[AndroidBridge] Initializing...');
@@ -516,5 +705,89 @@
 <body>
 <noscript>You need to enable JavaScript to run this app.</noscript>
 <div id="root"></div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+    <div class="nav-item active" data-section="courses" onclick="switchSection('courses')">
+        <div class="nav-icon">📚</div>
+        <div class="nav-label">Courses</div>
+    </div>
+    <div class="nav-item" data-section="upload" onclick="switchSection('upload')">
+        <div class="nav-icon">📤</div>
+        <div class="nav-label">Upload</div>
+    </div>
+    <div class="nav-item" data-section="learner" onclick="switchSection('learner')">
+        <div class="nav-icon">👤</div>
+        <div class="nav-label">Learner</div>
+    </div>
+    <div class="nav-item" data-section="path" onclick="switchSection('path')">
+        <div class="nav-icon">🎯</div>
+        <div class="nav-label">Path</div>
+    </div>
+    <div class="nav-item" data-section="examine" onclick="switchSection('examine')">
+        <div class="nav-icon">✍️</div>
+        <div class="nav-label">Examine</div>
+    </div>
+    <div class="nav-item" data-section="outcome" onclick="switchSection('outcome')">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Outcome</div>
+    </div>
+</nav>
+
+<script>
+    // Section switching functionality
+    function switchSection(sectionName) {
+        console.log('[Navigation] Switching to:', sectionName);
+        
+        // Update navigation active state
+        document.querySelectorAll('.nav-item').forEach(item => {
+            if (item.dataset.section === sectionName) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+        
+        // The React app will handle the actual content based on routing
+        // For now, we're just providing the navigation UI
+        // You can extend this to actually show/hide sections if needed
+        
+        // Optional: Store current section
+        localStorage.setItem('currentSection', sectionName);
+        
+        // Optional: Trigger custom event that React can listen to
+        window.dispatchEvent(new CustomEvent('sectionChange', { 
+            detail: { section: sectionName } 
+        }));
+    }
+    
+    // Restore last active section on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const lastSection = localStorage.getItem('currentSection') || 'courses';
+        switchSection(lastSection);
+        
+        console.log('[Navigation] Navigation system ready!');
+    });
+    
+    // Make navigation responsive to screen size changes
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            // Recalculate layout if needed
+            console.log('[Navigation] Screen resized to:', window.innerWidth, 'x', window.innerHeight);
+        }, 250);
+    });
+    
+    // Prevent zoom on double-tap for nav items
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function(event) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+</script>
 </body>
 </html>

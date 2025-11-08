@@ -859,38 +859,66 @@
             // Check if Android bridge is available
             if (window.Android && window.Android.generateCourseContent) {
                 console.log('[CourseGen] Using Android AI generation');
-
+                
                 updateProgress(30, 'Analyzing content with AI...');
-
-                window.Android.generateCourseContent(
-                    url,
-                    '', // extracted text will be handled by Android
-                    title,
-                    difficulty,
-                    audience,
-                    prerequisites,
-                    function(response) {
-                        console.log('[CourseGen] Response:', response);
-
-                        if (response.success) {
-                            updateProgress(100, 'Course generated successfully!');
-
-                            // Save course
-                            saveCourse(response.course);
-
-                            // Show success and navigate
-                            setTimeout(() => {
-                                alert('✅ Course generated successfully!');
-                                navigateTo('courses');
-                                document.getElementById('courseForm').reset();
-                                document.getElementById('generationStatus').style.display = 'none';
-                                document.getElementById('generateBtn').disabled = false;
-                            }, 1000);
-                        } else {
-                            throw new Error(response.message || 'Generation failed');
+                
+                // Set up timeout
+                let timeoutId;
+                let completed = false;
+                
+                const timeoutPromise = new Promise((resolve, reject) => {
+                    timeoutId = setTimeout(() => {
+                        if (!completed) {
+                            reject(new Error('AI generation timed out after 30 seconds. The AI model may not be downloaded yet.'));
                         }
+                    }, 30000); // 30 second timeout
+                });
+                
+                const generationPromise = new Promise((resolve, reject) => {
+                    try {
+                        window.Android.generateCourseContent(
+                            url,
+                            '', // extracted text will be handled by Android
+                            title,
+                            difficulty,
+                            audience,
+                            prerequisites,
+                            function(response) {
+                                completed = true;
+                                clearTimeout(timeoutId);
+                                console.log('[CourseGen] Response:', response);
+                                
+                                if (response.success) {
+                                    resolve(response);
+                                } else {
+                                    reject(new Error(response.message || response.error || 'Generation failed'));
+                                }
+                            }
+                        );
+                    } catch (err) {
+                        completed = true;
+                        clearTimeout(timeoutId);
+                        reject(err);
                     }
-                );
+                });
+                
+                // Race between timeout and generation
+                const response = await Promise.race([generationPromise, timeoutPromise]);
+                
+                updateProgress(100, 'Course generated successfully!');
+                
+                // Save course
+                saveCourse(response.course);
+                
+                // Show success and navigate
+                setTimeout(() => {
+                    alert('✅ Course generated successfully!');
+                    navigateTo('courses');
+                    document.getElementById('courseForm').reset();
+                    document.getElementById('generationStatus').style.display = 'none';
+                    document.getElementById('generateBtn').disabled = false;
+                }, 1000);
+                
             } else {
                 // Fallback for testing without Android
                 console.log('[CourseGen] Using mock generation');
@@ -933,9 +961,56 @@
             }
         } catch (error) {
             console.error('[CourseGen] Error:', error);
-            alert('❌ Failed to generate course: ' + error.message);
-            document.getElementById('generationStatus').style.display = 'none';
-            document.getElementById('generateBtn').disabled = false;
+            
+            // Check if it's a timeout error
+            if (error.message && error.message.includes('timed out')) {
+                // Use mock data instead
+                console.log('[CourseGen] Timeout - using mock data');
+                updateProgress(80, 'Using mock data...');
+                
+                const mockCourse = {
+                    id: 'course-' + Date.now(),
+                    title: title,
+                    difficulty: difficulty,
+                    audience: audience,
+                    prerequisites: prerequisites,
+                    icon: '📘',
+                    progress: 0,
+                    modules: [
+                        {
+                            id: 'module-1',
+                            title: 'Introduction to ' + title,
+                            lessons: ['Overview', 'Getting Started', 'Key Concepts']
+                        },
+                        {
+                            id: 'module-2',
+                            title: 'Core Concepts',
+                            lessons: ['Fundamentals', 'Best Practices', 'Advanced Topics']
+                        },
+                        {
+                            id: 'module-3',
+                            title: 'Practical Application',
+                            lessons: ['Hands-on Examples', 'Projects', 'Summary']
+                        }
+                    ]
+                };
+                
+                updateProgress(100, 'Course generated with mock data!');
+                saveCourse(mockCourse);
+                
+                setTimeout(() => {
+                    alert('⚠️ AI model not ready. Generated course with sample structure.\n\nTo use AI: Download the model first from the settings.');
+                    navigateTo('courses');
+                    document.getElementById('courseForm').reset();
+                    document.getElementById('generationStatus').style.display = 'none';
+                    document.getElementById('generateBtn').disabled = false;
+                }, 1000);
+            } else {
+                // Show error
+                alert('❌ Failed to generate course: ' + error.message);
+                document.getElementById('generationStatus').style.display = 'none';
+                document.getElementById('generateBtn').disabled = false;
+            }
         }
     }
 

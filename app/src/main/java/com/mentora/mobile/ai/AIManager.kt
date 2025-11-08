@@ -26,6 +26,14 @@ class AIManager(private val context: Context) {
     suspend fun getAvailableModels(): String {
         return try {
             val models = listAvailableModels()
+
+            // If RunAnywhere SDK returns empty list, provide fallback models
+            if (models.isEmpty()) {
+                Log.w(TAG, "listAvailableModels returned empty list, using fallback models")
+                // Return hardcoded model list as fallback
+                return createFallbackModels()
+            }
+
             val jsonArray = JSONArray()
 
             models.forEach { model ->
@@ -43,8 +51,29 @@ class AIManager(private val context: Context) {
             jsonArray.toString()
         } catch (e: Exception) {
             Log.e(TAG, "Failed to get available models: ${e.message}", e)
-            JSONArray().toString()
+            // Return fallback models on error
+            createFallbackModels()
         }
+    }
+
+    /**
+     * Create fallback model list when SDK doesn't provide models
+     */
+    private fun createFallbackModels(): String {
+        val jsonArray = JSONArray()
+
+        // Add TinyLlama as a known downloadable model
+        val tinyLlama = JSONObject().apply {
+            put("id", "tinyllama-1.1b")
+            put("name", "TinyLlama 1.1B")
+            put("category", "LLM")
+            put("sizeInMB", "637.00")
+            put("isDownloaded", false)
+        }
+        jsonArray.put(tinyLlama)
+
+        Log.d(TAG, "Using fallback model list")
+        return jsonArray.toString()
     }
 
     /**

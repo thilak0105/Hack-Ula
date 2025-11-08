@@ -110,21 +110,112 @@
                 let url = null;
                 if (data && data.get) url = data.get('url');
                 
+                // Check if this is a course generation request (not just upload)
+                const isCourseGeneration = this._url.includes('generate') || 
+                                          this._url.includes('course') ||
+                                          (!url && data); // Has data but no URL means it's generation
+                
                 if (url && window.Android && window.Android.extractWebsiteContent) {
+                    // Website extraction
                     console.log('[AndroidBridge] Fetching:', url);
                     const id = xhrId++;
                     pendingXHR.set(id, this);
                     const callback = 'handleWebResult_' + id;
                     window[callback] = function(r) { window.handleWebResult(id, r); delete window[callback]; };
                     window.Android.extractWebsiteContent(url, callback);
+                } else if (isCourseGeneration && window.Android && window.Android.generateText) {
+                    // Course generation with AI
+                    console.log('[AndroidBridge] Generating course with AI...');
+                    
+                    // Extract course details from FormData
+                    let courseInfo = {};
+                    if (data && data.get) {
+                        courseInfo = {
+                            title: data.get('title') || 'Machine Learning',
+                            difficulty: data.get('difficulty') || 'Beginner',
+                            audience: data.get('audience') || 'Students',
+                            prerequisites: data.get('prerequisites') || 'None'
+                        };
+                    }
+                    
+                    // Create prompt for AI
+                    const prompt = `Create a comprehensive course outline about ${courseInfo.title}.
+Level: ${courseInfo.difficulty}
+Target Audience: ${courseInfo.audience}
+Prerequisites: ${courseInfo.prerequisites}
+
+Generate a JSON course structure with:
+- Course title and description
+- 5-7 lessons with titles and brief descriptions
+- Each lesson should have 3-5 topics
+
+Format as JSON: {"title": "...", "description": "...", "lessons": [{"title": "...", "description": "...", "topics": [...]}]}`;
+                    
+                    console.log('[AndroidBridge] AI Prompt:', prompt);
+                    
+                    // Call AI to generate course
+                    window.Android.generateText(prompt, function(aiResponse) {
+                        console.log('[AndroidBridge] AI Response:', aiResponse);
+                        
+                        // Try to parse AI response as JSON
+                        let course;
+                        try {
+                            course = JSON.parse(aiResponse);
+                        } catch(e) {
+                            // If AI didn't return valid JSON, create a structured response
+                            console.warn('[AndroidBridge] AI response not JSON, structuring it...');
+                            course = {
+                                title: courseInfo.title,
+                                description: aiResponse.substring(0, 200),
+                                lessons: [
+                                    {
+                                        title: 'Introduction to ' + courseInfo.title,
+                                        description: 'Getting started',
+                                        topics: ['Overview', 'Key Concepts', 'Prerequisites']
+                                    }
+                                ]
+                            };
+                        }
+                        
+                        const responseData = {
+                            success: true,
+                            course: course,
+                            message: 'Course generated with on-device AI'
+                        };
+                        
+                        const json = JSON.stringify(responseData);
+                        Object.defineProperty(this, 'readyState', {writable: true, value: 4});
+                        Object.defineProperty(this, 'status', {writable: true, value: 200});
+                        Object.defineProperty(this, 'response', {writable: true, value: json});
+                        Object.defineProperty(this, 'responseText', {writable: true, value: json});
+                        
+                        this.getAllResponseHeaders = () => 'Content-Type: application/json\r\n';
+                        this.getResponseHeader = () => 'application/json';
+                        
+                        if (this.onreadystatechange) this.onreadystatechange({type: 'readystatechange', target: this});
+                        if (this.onload) this.onload({type: 'load', target: this});
+                        
+                        console.log('[AndroidBridge] Course generation complete!');
+                    }.bind(this));
                 } else {
+                    // No URL or AI, return mock
                     console.log('[AndroidBridge] No URL or Android not available, mocking');
                     setTimeout(function() {
                         const json = JSON.stringify({
                             success: true,
                             course_id: 'mock-' + Date.now(),
                             extracted_text: 'Please enter a website URL',
-                            course: {title: 'Sample', lessons: []}
+                            course: {
+                                title: 'Sample Course',
+                                description: 'A sample course for testing',
+                                lessons: [
+                                    {
+                                        title: 'Lesson 1: Introduction',
+                                        description: 'Getting started with the basics',
+                                        topics: ['Topic 1', 'Topic 2', 'Topic 3']
+                                    }
+                                ]
+                            }
                         });
                         Object.defineProperty(this, 'readyState', {writable: true, value: 4});
                         Object.defineProperty(this, 'status', {writable: true, value: 200});

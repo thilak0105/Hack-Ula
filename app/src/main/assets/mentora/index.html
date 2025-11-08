@@ -10,156 +10,101 @@
     <link rel="manifest" href="./manifest.json"/>
     <title>React App</title>
     <script>
-        // Test if Android interface is available
-        console.log('[AndroidTest] Page loaded!');
-        console.log('[AndroidTest] window.Android =', window.Android);
-        console.log('[AndroidTest] typeof window.Android =', typeof window.Android);
-        
-        if (window.Android) {
-            console.log('[AndroidTest] SUCCESS! Android interface is available!');
-            console.log('[AndroidTest] Has extractWebsiteContent?', typeof window.Android.extractWebsiteContent);
-        } else {
-            console.error('[AndroidTest] FAIL! window.Android is undefined!');
-        }
-        
-        // Navigation Fix - Android Integration
+        // Android Bridge - Must load BEFORE React app
         console.log('[AndroidBridge] Initializing...');
-
-        // Flag that we're on Android
+        
         window.isAndroidApp = true;
-
-        // Store pending XHR requests to handle them
-        const pendingRequests = new Map();
-        let requestIdCounter = 0;
-
-        // Callback handler for website extraction
-        window.handleWebsiteExtraction = function(requestId, result) {
-            console.log('[AndroidBridge] Website extraction complete:', result);
-            const xhr = pendingRequests.get(requestId);
-            if (xhr) {
-                const responseText = JSON.stringify({
-                    success: result.success,
-                    course_id: 'android-' + Date.now(),
-                    extracted_text: result.text || '',
-                    course: {
-                        title: result.title || 'Untitled Course',
-                        description: 'Extracted from: ' + result.url,
-                        lessons: []
-                    },
-                    message: result.success ? 'Content extracted successfully' : result.error
-                });
-                
-                // Set response properties
-                Object.defineProperty(xhr, 'readyState', { writable: true, value: 4 });
-                Object.defineProperty(xhr, 'status', { writable: true, value: result.success ? 200 : 500 });
-                Object.defineProperty(xhr, 'statusText', { writable: true, value: result.success ? 'OK' : 'Error' });
-                Object.defineProperty(xhr, 'response', { writable: true, value: responseText });
-                Object.defineProperty(xhr, 'responseText', { writable: true, value: responseText });
-                Object.defineProperty(xhr, 'responseType', { writable: true, value: 'text' });
-                
-                // Create proper response headers
-                const mockHeaders = 'Content-Type: application/json\r\n';
-                xhr.getAllResponseHeaders = () => mockHeaders;
-                xhr.getResponseHeader = (name) => {
-                    if (name.toLowerCase() === 'content-type') return 'application/json';
-                    return null;
-                };
-                
-                // Trigger events
-                if (xhr.onreadystatechange) xhr.onreadystatechange({ target: xhr });
-                if (xhr.onload) xhr.onload({ target: xhr });
-                
-                pendingRequests.delete(requestId);
-            }
-        };
-
-        // Override XMLHttpRequest for axios
-        const OriginalXHR = window.XMLHttpRequest;
-        window.XMLHttpRequest = function() {
-            const xhr = new OriginalXHR();
-            const originalOpen = xhr.open;
-            const originalSend = xhr.send;
+        
+        // Store pending requests
+        const pendingXHR = new Map();
+        let xhrId = 0;
+        
+        // Handler for website extraction results
+        window.handleWebResult = function(id, result) {
+            console.log('[AndroidBridge] Got result for request', id);
+            const xhr = pendingXHR.get(id);
+            if (!xhr) return;
             
-            xhr.open = function(method, url, ...args) {
-                this._method = method;
-                this._url = url;
-                
-                // Check if this is an upload/api call
-                if (url.includes('localhost') || url.includes('/api/') || url.includes('/upload')) {
-                    this._shouldIntercept = true;
-                    console.log('[AndroidBridge] Will intercept:', method, url);
+            const data = {
+                success: result.success || false,
+                course_id: 'android-' + Date.now(),
+                extracted_text: result.text || '',
+                course: {
+                    title: result.title || 'Untitled',
+                    description: result.url || '',
+                    lessons: []
                 }
-                
-                return originalOpen.call(this, method, url, ...args);
+            };
+            
+            const json = JSON.stringify(data);
+            Object.defineProperty(xhr, 'readyState', {writable: true, value: 4});
+            Object.defineProperty(xhr, 'status', {writable: true, value: result.success ? 200 : 500});
+            Object.defineProperty(xhr, 'response', {writable: true, value: json});
+            Object.defineProperty(xhr, 'responseText', {writable: true, value: json});
+            
+            xhr.getAllResponseHeaders = () => 'Content-Type: application/json';
+            xhr.getResponseHeader = (n) => n === 'content-type' ? 'application/json' : null;
+            
+            if (xhr.onreadystatechange) xhr.onreadystatechange();
+            if (xhr.onload) xhr.onload();
+            
+            pendingXHR.delete(id);
+        };
+        
+        // Override XMLHttpRequest
+        const RealXHR = window.XMLHttpRequest;
+        window.XMLHttpRequest = function() {
+            const xhr = new RealXHR();
+            const realOpen = xhr.open;
+            const realSend = xhr.send;
+            
+            xhr.open = function(method, url) {
+                this._url = url;
+                this._intercept = url.includes('localhost') || url.includes('/upload');
+                if (this._intercept) console.log('[AndroidBridge] Intercepting:', url);
+                return realOpen.apply(this, arguments);
             };
             
             xhr.send = function(data) {
-                if (this._shouldIntercept) {
-                    console.log('[AndroidBridge] Intercepting request to:', this._url);
-                    
-                    // Check if FormData contains a URL
-                    let websiteUrl = null;
-                    if (data instanceof FormData) {
-                        websiteUrl = data.get('url');
-                    }
-                    
-                    if (websiteUrl && window.Android && window.Android.extractWebsiteContent) {
-                        // Use Android to extract real website content!
-                        console.log('[AndroidBridge] Extracting content from:', websiteUrl);
-                        const requestId = requestIdCounter++;
-                        pendingRequests.set(requestId, this);
-                        
-                        // Create a callback function name dynamically
-                        const callbackName = 'handleWebExtraction_' + requestId;
-                        window[callbackName] = function(result) {
-                            window.handleWebsiteExtraction(requestId, result);
-                            delete window[callbackName]; // Clean up
-                        };
-                        
-                        // Call Android method to extract website
-                        window.Android.extractWebsiteContent(websiteUrl, callbackName);
-                    } else {
-                        // No URL provided, return mock/skip
-                        console.log('[AndroidBridge] No URL provided, using mock data');
-                        setTimeout(() => {
-                            const mockData = {
-                                success: true,
-                                course_id: 'android-mock-' + Date.now(),
-                                extracted_text: 'No content provided. Please enter a website URL.',
-                                course: { title: 'Sample Course', lessons: [] },
-                                message: 'Skipped - No URL provided'
-                            };
-                            const responseText = JSON.stringify(mockData);
-                            
-                            Object.defineProperty(this, 'readyState', { writable: true, value: 4 });
-                            Object.defineProperty(this, 'status', { writable: true, value: 200 });
-                            Object.defineProperty(this, 'statusText', { writable: true, value: 'OK' });
-                            Object.defineProperty(this, 'response', { writable: true, value: responseText });
-                            Object.defineProperty(this, 'responseText', { writable: true, value: responseText });
-                            Object.defineProperty(this, 'responseType', { writable: true, value: 'text' });
-                            
-                            const mockHeaders = 'Content-Type: application/json\r\n';
-                            this.getAllResponseHeaders = () => mockHeaders;
-                            this.getResponseHeader = (name) => {
-                                if (name.toLowerCase() === 'content-type') return 'application/json';
-                                return null;
-                            };
-                            
-                            if (this.onreadystatechange) this.onreadystatechange({ target: this });
-                            if (this.onload) this.onload({ target: this });
-                        }.bind(this), 200);
-                    }
-                    
-                    return;
-                }
+                if (!this._intercept) return realSend.call(this, data);
                 
-                return originalSend.call(this, data);
+                console.log('[AndroidBridge] Handling intercepted request');
+                
+                let url = null;
+                if (data && data.get) url = data.get('url');
+                
+                if (url && window.Android && window.Android.extractWebsiteContent) {
+                    console.log('[AndroidBridge] Fetching:', url);
+                    const id = xhrId++;
+                    pendingXHR.set(id, this);
+                    const callback = 'handleWebResult_' + id;
+                    window[callback] = function(r) { window.handleWebResult(id, r); delete window[callback]; };
+                    window.Android.extractWebsiteContent(url, callback);
+                } else {
+                    console.log('[AndroidBridge] No URL or Android not available, mocking');
+                    setTimeout(function() {
+                        const json = JSON.stringify({
+                            success: true,
+                            course_id: 'mock-' + Date.now(),
+                            extracted_text: 'Please enter a website URL',
+                            course: {title: 'Sample', lessons: []}
+                        });
+                        Object.defineProperty(this, 'readyState', {writable: true, value: 4});
+                        Object.defineProperty(this, 'status', {writable: true, value: 200});
+                        Object.defineProperty(this, 'response', {writable: true, value: json});
+                        Object.defineProperty(this, 'responseText', {writable: true, value: json});
+                        this.getAllResponseHeaders = () => 'Content-Type: application/json';
+                        this.getResponseHeader = () => 'application/json';
+                        if (this.onreadystatechange) this.onreadystatechange();
+                        if (this.onload) this.onload();
+                    }.bind(this), 200);
+                }
             };
             
             return xhr;
         };
-
-        console.log('[AndroidBridge] Ready! Website extraction enabled.');
+        
+        console.log('[AndroidBridge] Ready!');
     </script>
     <script defer="defer" src="./static/js/main.9dbe6570.js"></script>
     <link href="./static/css/main.e6c13ad2.css" rel="stylesheet">

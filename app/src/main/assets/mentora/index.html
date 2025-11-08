@@ -785,6 +785,18 @@
                 <!-- Course details will be loaded here -->
             </div>
         </div>
+
+        <!-- Page: Lesson Viewer -->
+        <div id="page-lesson-viewer" class="page">
+            <button class="btn btn-secondary mb-2" onclick="goBackToCourseViewer()"
+                    style="width: auto; padding: 8px 16px;">
+                <span>←</span> Back to Course
+            </button>
+
+            <div id="lessonViewerContent">
+                <!-- Lesson content will be loaded here -->
+            </div>
+        </div>
     </main>
 
     <!-- Bottom Navigation -->
@@ -844,6 +856,10 @@
 
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goBackToCourseViewer() {
+        navigateTo('course-viewer');
     }
 
     // Restore last page on load
@@ -1136,7 +1152,7 @@
                         ${module.lessons && module.lessons.length > 0 ? `
                             <div style="margin-top: 12px;">
                                 ${module.lessons.map((lesson, lIndex) => `
-                                    <div style="padding: 12px; background: var(--light); border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                                    <div style="padding: 12px; background: var(--light); border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s ease;" onclick="viewLesson('${typeof lesson === 'string' ? lesson : lesson.title}', '${courseId}')" onmouseover="this.style.background='#E5E7EB'" onmouseout="this.style.background='var(--light)'">
                                         <div style="display: flex; align-items: center; gap: 12px;">
                                             <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--white); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--primary);">
                                                 ${lIndex + 1}
@@ -1165,6 +1181,101 @@
         
         document.getElementById('courseViewerContent').innerHTML = html;
         navigateTo('course-viewer');
+    }
+
+    function viewLesson(lessonTitle, courseId) {
+        const courses = JSON.parse(localStorage.getItem('courses') || '[]');
+        const course = courses.find(c => c.id === courseId);
+        
+        // Generate lesson content
+        let html = `
+            <div class="card">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;">
+                        📖
+                    </div>
+                    <div style="flex: 1;">
+                        <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 4px;">${lessonTitle}</h2>
+                        <p style="font-size: 14px; color: var(--gray);">⏱️ 20 minutes • ${course ? course.difficulty : 'Beginner'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title" style="margin-bottom: 16px;">📝 Introduction</h3>
+                <p style="color: var(--dark); line-height: 1.8; margin-bottom: 16px;">
+                    Welcome to this lesson on <strong>${lessonTitle}</strong>. In this section, we'll explore the key concepts 
+                    and principles that will help you understand this topic thoroughly.
+                </p>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title" style="margin-bottom: 16px;">🎯 Learning Objectives</h3>
+                <ul style="color: var(--dark); line-height: 1.8; padding-left: 24px;">
+                    <li style="margin-bottom: 8px;">Understand the fundamental concepts of ${lessonTitle}</li>
+                    <li style="margin-bottom: 8px;">Learn practical applications and use cases</li>
+                    <li style="margin-bottom: 8px;">Master the key techniques and best practices</li>
+                    <li style="margin-bottom: 8px;">Apply your knowledge through examples</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title" style="margin-bottom: 16px;">📚 Main Content</h3>
+                
+                <h4 style="font-size: 18px; font-weight: 700; color: var(--primary); margin: 20px 0 12px;">What is ${lessonTitle}?</h4>
+                <p style="color: var(--dark); line-height: 1.8; margin-bottom: 16px;">
+                    ${lessonTitle} is a crucial concept in this field. It represents the foundational knowledge 
+                    you need to progress in your learning journey. Understanding this topic will enable you to 
+                    tackle more advanced concepts with confidence.
+                </p>
+                
+                <h4 style="font-size: 18px; font-weight: 700; color: var(--primary); margin: 20px 0 12px;">Key Concepts</h4>
+                <div style="background: var(--light); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                    <ul style="color: var(--dark); line-height: 1.8; padding-left: 24px;">
+                        <li style="margin-bottom: 12px;"><strong>Concept 1:</strong> The basics and foundational understanding</li>
+                        <li style="margin-bottom: 12px;"><strong>Concept 2:</strong> Building upon the fundamentals</li>
+                        <li style="margin-bottom: 12px;"><strong>Concept 3:</strong> Advanced applications and techniques</li>
+                    </ul>
+                </div>
+                
+                <h4 style="font-size: 18px; font-weight: 700; color: var(--primary); margin: 20px 0 12px;">Practical Examples</h4>
+                <div style="background: #F0F9FF; border-left: 4px solid #3B82F6; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                    <p style="color: var(--dark); line-height: 1.8; margin: 0;">
+                        <strong>Example:</strong> In real-world applications, ${lessonTitle} can be used to solve 
+                        various problems and challenges. By applying what you learn here, you'll be able to 
+                        implement solutions effectively.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title" style="margin-bottom: 16px;">💡 Key Takeaways</h3>
+                <div style="background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 16px; border-radius: 8px;">
+                    <ul style="color: var(--dark); line-height: 1.8; padding-left: 24px; margin: 0;">
+                        <li style="margin-bottom: 8px;">Master the fundamental concepts before moving forward</li>
+                        <li style="margin-bottom: 8px;">Practice regularly to reinforce your understanding</li>
+                        <li style="margin-bottom: 8px;">Apply what you learn in real-world scenarios</li>
+                        <li style="margin-bottom: 0;">Keep exploring and stay curious!</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title mb-2" style="text-align: center;">✅ Lesson Complete!</h3>
+                <p style="color: var(--gray); margin-bottom: 16px; text-align: center;">Great job! You've finished this lesson.</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <button class="btn btn-secondary" onclick="goBackToCourseViewer()">
+                        <span>📚</span> Back to Course
+                    </button>
+                    <button class="btn btn-primary" onclick="goBackToCourseViewer()">
+                        <span>→</span> Next Lesson
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('lessonViewerContent').innerHTML = html;
+        navigateTo('lesson-viewer');
     }
 
     // ========== UTILITIES ==========

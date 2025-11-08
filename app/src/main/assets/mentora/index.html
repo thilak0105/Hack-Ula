@@ -770,6 +770,18 @@
                     insights.</p>
             </div>
         </div>
+
+        <!-- Page: Course Viewer -->
+        <div id="page-course-viewer" class="page">
+            <button class="btn btn-secondary mb-2" onclick="navigateTo('courses')"
+                    style="width: auto; padding: 8px 16px;">
+                <span>←</span> Back to Courses
+            </button>
+
+            <div id="courseViewerContent">
+                <!-- Course details will be loaded here -->
+            </div>
+        </div>
     </main>
 
     <!-- Bottom Navigation -->
@@ -1065,7 +1077,93 @@
     }
 
     function viewCourse(courseId) {
-        alert('Course viewer coming soon! Course ID: ' + courseId);
+        const courses = JSON.parse(localStorage.getItem('courses') || '[]');
+        const course = courses.find(c => c.id === courseId);
+        
+        if (!course) {
+            alert('Course not found');
+            return;
+        }
+        
+        // Build course viewer HTML
+        let html = `
+            <div class="card">
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                    <div style="width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); display: flex; align-items: center; justify-content: center; font-size: 40px; color: white;">
+                        ${course.icon || '📘'}
+                    </div>
+                    <div style="flex: 1;">
+                        <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">${course.title}</h2>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <span style="padding: 4px 12px; background: #DBEAFE; color: #1E40AF; border-radius: 8px; font-size: 12px; font-weight: 600;">
+                                📊 ${course.difficulty || 'Beginner'}
+                            </span>
+                            <span style="padding: 4px 12px; background: #D1FAE5; color: #065F46; border-radius: 8px; font-size: 12px; font-weight: 600;">
+                                👥 ${course.audience || 'General'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-bar" style="margin: 16px 0;">
+                    <div class="progress-fill" style="width: ${course.progress || 0}%"></div>
+                </div>
+                <p style="text-align: center; font-size: 14px; color: var(--gray);">${course.progress || 0}% Complete</p>
+            </div>
+            
+            ${course.prerequisites ? `
+            <div class="card">
+                <h3 class="card-title">📋 Prerequisites</h3>
+                <p style="color: var(--gray); line-height: 1.6;">${course.prerequisites}</p>
+            </div>
+            ` : ''}
+        `;
+        
+        // Add modules
+        if (course.modules && course.modules.length > 0) {
+            html += `<h3 style="font-size: 20px; font-weight: 700; margin: 24px 0 16px;">📚 Course Modules</h3>`;
+            
+            course.modules.forEach((module, index) => {
+                html += `
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">${index + 1}. ${module.title}</h4>
+                            <span class="card-badge badge-progress">${module.lessons ? module.lessons.length : 0} lessons</span>
+                        </div>
+                        ${module.description ? `<p style="color: var(--gray); margin-bottom: 12px; font-size: 14px;">${module.description}</p>` : ''}
+                        
+                        ${module.lessons && module.lessons.length > 0 ? `
+                            <div style="margin-top: 12px;">
+                                ${module.lessons.map((lesson, lIndex) => `
+                                    <div style="padding: 12px; background: var(--light); border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--white); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--primary);">
+                                                ${lIndex + 1}
+                                            </div>
+                                            <span style="font-size: 14px; font-weight: 600; color: var(--dark);">${typeof lesson === 'string' ? lesson : lesson.title}</span>
+                                        </div>
+                                        <span style="font-size: 12px; color: var(--gray);">20 min</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+        }
+        
+        html += `
+            <div class="card" style="text-align: center;">
+                <h3 class="card-title mb-2">🎯 Ready to Start?</h3>
+                <p style="color: var(--gray); margin-bottom: 16px;">Begin your learning journey with this course</p>
+                <button class="btn btn-primary" onclick="alert('Lesson viewer coming soon!')">
+                    <span>▶️</span> Start First Lesson
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('courseViewerContent').innerHTML = html;
+        navigateTo('course-viewer');
     }
 
     // ========== UTILITIES ==========

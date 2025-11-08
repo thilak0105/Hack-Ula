@@ -536,9 +536,212 @@
         .text-xs { font-size: 13.2px; }
         .text-gray { color: var(--gray); }
         .font-bold { font-weight: 700; }
+        
+        /* ========== ENHANCEMENTS ========== */
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeOut 0.5s ease 1.5s forwards;
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                pointer-events: none;
+            }
+        }
+        
+        .splash-logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            animation: bounceIn 0.8s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .splash-text {
+            color: white;
+            font-size: 33px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            animation: fadeInUp 0.8s ease 0.3s both;
+        }
+        
+        .splash-tagline {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16.5px;
+            animation: fadeInUp 0.8s ease 0.5s both;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .splash-loader {
+            margin-top: 40px;
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        /* Card Hover Effects */
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        /* Button Ripple Effect */
+        .btn {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* Search Bar */
+        .search-bar {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 14px 48px 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 17.6px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 19.8px;
+            color: var(--gray);
+        }
+        
+        /* Completion Badge */
+        .completion-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: #D1FAE5;
+            color: #065F46;
+            border-radius: 12px;
+            font-size: 12.1px;
+            font-weight: 600;
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--dark);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 15.4px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            animation: toastSlideIn 0.3s ease forwards;
+        }
+        
+        @keyframes toastSlideIn {
+            to {
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        .toast.hiding {
+            animation: toastSlideOut 0.3s ease forwards;
+        }
+        
+        @keyframes toastSlideOut {
+            to {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
+<!-- Splash Screen -->
+<div class="splash-screen">
+    <div class="splash-logo">
+        <img src="./logo.svg" alt="Mentora" style="width: 80%; height: 80%; object-fit: contain;">
+    </div>
+    <div class="splash-text">Mentora</div>
+    <div class="splash-tagline">AI-Powered Learning Platform</div>
+    <div class="splash-loader"></div>
+</div>
+
 <div class="app">
     <!-- Header -->
     <header class="header">
@@ -561,6 +764,12 @@
         <div id="page-courses" class="page active">
             <h2 class="page-title">My Courses</h2>
             <p class="page-subtitle">Continue your learning journey</p>
+
+            <div class="search-bar" id="coursesSearchBar" style="display: none;">
+                <input type="text" class="search-input" placeholder="Search courses..."
+                       id="coursesSearch" oninput="filterCourses(this.value)">
+                <span class="search-icon">🔍</span>
+            </div>
 
             <div id="coursesList">
                 <div class="empty-state">
@@ -1059,6 +1268,7 @@
     function loadCourses() {
         const courses = JSON.parse(localStorage.getItem('courses') || '[]');
         const coursesList = document.getElementById('coursesList');
+        const searchBar = document.getElementById('coursesSearchBar');
 
         if (courses.length === 0) {
             coursesList.innerHTML = `
@@ -1071,8 +1281,12 @@
                     </button>
                 </div>
             `;
+            if (searchBar) searchBar.style.display = 'none';
             return;
         }
+
+        // Show search bar if there are courses
+        if (searchBar) searchBar.style.display = 'block';
 
         coursesList.innerHTML = courses.map(course => `
             <div class="course-item" onclick="viewCourse('${course.id}')">
@@ -1173,9 +1387,14 @@
             <div class="card" style="text-align: center;">
                 <h3 class="card-title mb-2">🎯 Ready to Start?</h3>
                 <p style="color: var(--gray); margin-bottom: 16px;">Begin your learning journey with this course</p>
-                <button class="btn btn-primary" onclick="navigateTo('courses')">
-                    <span>←</span> Back to Courses
-                </button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <button class="btn btn-secondary" onclick="goBackToCourseViewer()">
+                        <span>📚</span> Back to Courses
+                    </button>
+                    <button class="btn btn-primary" onclick="goBackToCourseViewer()">
+                        <span>→</span> Next Lesson
+                    </button>
+                </div>
             </div>
         `;
         
@@ -1280,11 +1499,76 @@
 
     // ========== UTILITIES ==========
     function showNotifications() {
-        alert('🔔 No new notifications');
+        showToast('🔔 No new notifications');
     }
 
     function showProfile() {
         navigateTo('learner');
+    }
+    
+    // Toast notification helper
+    function showToast(message, duration = 3000) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('hiding');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, duration);
+    }
+    
+    // Filter courses by search
+    function filterCourses(searchTerm) {
+        const courses = JSON.parse(localStorage.getItem('courses') || '[]');
+        const filtered = courses.filter(course => 
+            course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (course.difficulty && course.difficulty.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+        
+        const coursesList = document.getElementById('coursesList');
+        if (filtered.length === 0 && searchTerm) {
+            coursesList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <h3 class="empty-title">No courses found</h3>
+                    <p class="empty-text">Try a different search term</p>
+                </div>
+            `;
+        } else if (filtered.length === 0) {
+            // Show default empty state
+            coursesList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📚</div>
+                    <h3 class="empty-title">No courses yet</h3>
+                    <p class="empty-text">Generate your first AI-powered course from any website!</p>
+                    <button class="btn btn-primary mt-2" onclick="navigateTo('upload')">
+                        <span>📤</span> Generate Course
+                    </button>
+                </div>
+            `;
+        } else {
+            coursesList.innerHTML = filtered.map(course => `
+                <div class="course-item" onclick="viewCourse('${course.id}')">
+                    <div class="course-icon" style="background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); color: white;">
+                        ${course.icon || '📘'}
+                    </div>
+                    <div class="course-info">
+                        <div class="course-title">${course.title}</div>
+                        <div class="course-meta">
+                            <span>📊 ${course.difficulty || 'Beginner'}</span>
+                            <span>⏱️ ${course.modules ? course.modules.length : 0} modules</span>
+                        </div>
+                        <div class="progress-bar" style="margin-top: 8px;">
+                            <div class="progress-fill" style="width: ${course.progress || 0}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
     }
 
     // Prevent zoom on double-tap

@@ -1,0 +1,93 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ChromaDB
+chroma_db/
+*.sqlite3
+*.db
+
+# Downloads
+downloads/
+*.pptx
+*.pdf
+
+# Test databases
+test_vector_db/
+extraction_test_db/
+pdf_test_vector_db/
+vector_db/
+
+# React Native / Node
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnp/
+.pnp.js
+
+# Metro
+.metro-health-check*
+
+# Android
+*.apk
+*.aab
+*.keystore
+.gradle/
+local.properties
+
+# iOS
+*.xcworkspace
+!default.xcworkspace
+xcuserdata/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.hmap
+*.ipa
+DerivedData/
+build/
+*.moved-aside
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Remotion video
+remotion_video/
+

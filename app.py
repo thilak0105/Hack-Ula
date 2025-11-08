@@ -170,14 +170,6 @@ def get_lesson_content():
         
     except Exception as e:
         return jsonify({"error": f"Failed to generate lesson content: {str(e)}"}), 500
-    query = request.json.get('query')
-    n_results = request.json.get('n_results', 5)
-    
-    if not query:
-        return jsonify({"error": "No query provided"}), 400
-        
-    results = document_store.search_content(query, n_results)
-    return jsonify(results)
 
 @app.route('/course/<course_id>', methods=['GET'])
 def get_course(course_id):

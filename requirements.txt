@@ -14,7 +14,8 @@ google-generativeai
 transformers
 torch
 accelerate
-libretranslate
 gTTS
 pydub
 reportlab
+deep-translator
+python-dotenv

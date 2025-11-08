@@ -1,344 +1,306 @@
-# Quick Start Guide - MentoraMobile with AI
+# Quick Start Guide - AI Course Generation
 
-Get up and running with MentoraMobile and on-device AI in 5 minutes!
+## 🚀 Get Started in 5 Steps
 
-## 📦 What You Have
-
-- ✅ Complete Android app with Kotlin
-- ✅ WebView hosting your React app
-- ✅ RunAnywhere SDK integrated (v0.1.3-alpha)
-- ✅ 3 AI models pre-registered
-- ✅ JavaScript bridge with AI methods
-- ✅ Full documentation
-
----
-
-## 🚀 Quick Build & Run
-
-### Step 1: Open in Android Studio
-
+### Step 1: Build & Install the App
 ```bash
-cd /path/to/MentoraMobile
-# Open this directory in Android Studio
+./gradlew assembleDebug
+adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 
-### Step 2: Sync Gradle
+### Step 2: Enable Chrome DevTools (For Testing)
 
-- Android Studio will prompt to sync Gradle
-- Click "Sync Now"
-- **⏱️ First sync takes 2-3 minutes** (JitPack builds RunAnywhere SDK)
-- Subsequent syncs are instant
+1. Connect your Android device via USB (enable USB debugging)
+2. Open Chrome browser on your computer
+3. Navigate to `chrome://inspect`
+4. Find "Mentora Mobile" WebView
+5. Click **"Inspect"**
 
-### Step 3: Build the App
+### Step 3: Download an AI Model
 
-```bash
-./gradlew build
-```
-
-Or in Android Studio: `Build > Make Project`
-
-### Step 4: Run on Device
-
-```bash
-./gradlew installDebug
-```
-
-Or in Android Studio: Click the green "Run" button ▶️
-
----
-
-## 🤖 Test AI Features
-
-### From Android Studio Logcat
-
-After the app starts, you should see:
-
-```
-I/MentoraApp: Initializing RunAnywhere SDK...
-I/MentoraApp: RunAnywhere SDK initialized successfully
-I/MentoraApp: AI models registered successfully
-```
-
-### From Your React App
-
-Add this test code to your React component:
+In the Chrome DevTools console, run:
 
 ```javascript
-import React, { useEffect, useState } from 'react';
-
-function AITest() {
-  const [models, setModels] = useState([]);
-  const [aiReady, setAiReady] = useState(false);
-
-  useEffect(() => {
-    // Check if AI is available
-    if (window.Android) {
-      console.log("✅ AI Bridge is available!");
-      setAiReady(true);
-      
-      // Get available models
-      window.Android.getAvailableModels((modelsJson) => {
-        const modelsList = JSON.parse(modelsJson);
-        console.log("📦 Available models:", modelsList);
-        setModels(modelsList);
-      });
-    } else {
-      console.log("❌ AI Bridge not available (not running on Android?)");
-    }
-  }, []);
-
-  const testAI = () => {
-    if (window.Android) {
-      window.Android.generateText("Say hello!", (response) => {
-        alert(`AI Response: ${response}`);
-      });
-    }
-  };
-
-  return (
-    <div>
-      <h2>AI Status: {aiReady ? "✅ Ready" : "❌ Not Available"}</h2>
-      <h3>Models: {models.length}</h3>
-      <button onClick={testAI}>Test AI</button>
-    </div>
-  );
-}
-
-export default AITest;
-```
-
----
-
-## 📱 Download and Use AI
-
-### Step 1: Get Model ID
-
-```javascript
-window.Android.getAvailableModels((modelsJson) => {
-  const models = JSON.parse(modelsJson);
-  console.log("First model ID:", models[0].id);
-  // Use this ID for next steps
-});
-```
-
-### Step 2: Download Model
-
-```javascript
-const modelId = "model-id-from-step-1";
-
+// Option A: Quick download (smallest model - recommended for testing)
 window.Android.downloadModel(
-  modelId,
-  (progress) => console.log(`Downloading: ${progress}%`),
-  (success) => console.log(`Download ${success === "true" ? "succeeded" : "failed"}`)
+    'tinyllama-1.1b',
+    (progress) => console.log('⬇️ Progress:', progress + '%'),
+    (success) => console.log(success ? '✅ Download complete!' : '❌ Download failed')
 );
 ```
 
-### Step 3: Load Model
+**Expected output:**
+```
+⬇️ Progress: 0%
+⬇️ Progress: 5%
+⬇️ Progress: 10%
+...
+⬇️ Progress: 100%
+✅ Download complete!
+```
+
+**⏱️ Wait time:** 2-5 minutes on good WiFi
+
+### Step 4: Verify Model Downloaded
 
 ```javascript
-window.Android.loadModel(modelId, (success) => {
-  if (success === "true") {
-    console.log("✅ Model loaded! Ready to use AI");
+window.Android.getAvailableModels((models) => {
+    const modelList = JSON.parse(models);
+    modelList.forEach(m => {
+        console.log(`${m.name}: ${m.isDownloaded ? '✅ Downloaded' : '❌ Not downloaded'}`);
+    });
+});
+```
+
+**Expected output:**
+```
+TinyLlama 1.1B: ✅ Downloaded
+Phi-2 2.7B: ❌ Not downloaded
+```
+
+### Step 5: Test Course Generation
+
+Now use the app UI:
+
+1. **Navigate to Course Creation** in the app
+2. **Fill in the form:**
+    - **Website URL** (optional): `https://en.wikipedia.org/wiki/Machine_learning`
+    - **Course Title**: "Introduction to Machine Learning"
+    - **Difficulty**: "Beginner"
+    - **Audience**: "Students"
+    - **Prerequisites**: "Basic programming"
+
+3. **Click "Generate Content"**
+
+4. **Wait 10-30 seconds** for AI to generate the course
+
+5. **View the generated course** with lessons and topics!
+
+---
+
+## 🎯 Quick Test (Without UI)
+
+If you want to test AI generation directly from console:
+
+```javascript
+// Test course generation
+window.Android.generateCourseContent(
+    'https://en.wikipedia.org/wiki/Python_(programming_language)',  // URL
+    '',                          // extractedText (empty, will scrape from URL)
+    'Python Programming',        // title
+    'Beginner',                  // difficulty
+    'Students',                  // audience
+    'None',                      // prerequisites
+    function(response) {
+        console.log('🎓 Generated Course:', response);
+        if (response.success) {
+            console.log('✅ Course Title:', response.course.title);
+            console.log('📚 Number of Lessons:', response.course.lessons.length);
+            console.log('📝 Lessons:', response.course.lessons);
+        } else {
+            console.log('❌ Error:', response.error);
+        }
+    }
+);
+```
+
+**Expected output:**
+```
+[WebAppInterface] Starting course generation workflow...
+[WebAppInterface] Extracting content from URL: https://en.wikipedia.org/wiki/Python_(programming_language)
+[WebAppInterface] Checking if AI model is loaded...
+[WebAppInterface] Loading model: tinyllama-1.1b
+[WebAppInterface] Model loaded successfully!
+[WebAppInterface] Generating course with AI...
+[WebAppInterface] AI Response received: {...
+[WebAppInterface] Course generation completed successfully!
+
+🎓 Generated Course: {
+  success: true,
+  course_id: "ai-1699876543210",
+  course: {
+    title: "Python Programming Fundamentals",
+    description: "A comprehensive introduction to Python...",
+    lessons: [
+      {
+        title: "Lesson 1: Introduction to Python",
+        description: "Learn Python basics...",
+        topics: ["What is Python", "Installing Python", "First Program"]
+      },
+      // ... more lessons
+    ]
   }
-});
-```
-
-### Step 4: Generate AI Response
-
-```javascript
-window.Android.generateText("What is mentoring?", (response) => {
-  console.log("AI says:", response);
-});
-```
-
----
-
-## 📚 Documentation
-
-| Document | Description |
-|----------|-------------|
-| **[README.md](README.md)** | Project overview, features, setup |
-| **[AI_INTEGRATION_GUIDE.md](AI_INTEGRATION_GUIDE.md)** | Complete AI API reference & examples |
-| **[RUNANYWHERE_INTEGRATION_SUMMARY.md](RUNANYWHERE_INTEGRATION_SUMMARY.md)** | Integration details & what was added |
-| **[KOTLIN_FILES_OVERVIEW.md](KOTLIN_FILES_OVERVIEW.md)** | Kotlin code documentation |
-| **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** | File list & project statistics |
-
----
-
-## 🔍 Key Files
-
-### Kotlin Files
-
-```
-app/src/main/java/com/mentora/mobile/
-├── MainActivity.kt              # Main WebView activity
-├── MentoraApplication.kt        # SDK initialization
-├── WebAppInterface.kt           # JavaScript bridge (AI methods)
-├── SplashActivity.kt            # Splash screen
-├── ai/
-│   └── AIManager.kt             # AI operations manager
-└── utils/
-    ├── Constants.kt             # App constants
-    ├── NetworkUtil.kt           # Network utilities
-    └── PreferenceManager.kt     # Preferences manager
-```
-
-### Configuration Files
-
-```
-app/build.gradle                 # Dependencies (RunAnywhere SDK)
-settings.gradle                  # JitPack repository
-AndroidManifest.xml              # Permissions & settings
-```
-
----
-
-## 💡 Example Use Cases
-
-### Simple Q&A
-
-```javascript
-function askAI(question) {
-  window.Android.generateText(question, (answer) => {
-    document.getElementById("answer").textContent = answer;
-  });
-}
-```
-
-### Streaming Chat
-
-```javascript
-function streamChat(message) {
-  let response = "";
-  window.Android.generateTextStream(
-    message,
-    (token) => {
-      response += token;
-      document.getElementById("chat").textContent = response;
-    },
-    () => console.log("Done!")
-  );
-}
-```
-
-### Mentoring Assistant
-
-```javascript
-function getMentoringAdvice(situation) {
-  const prompt = `As a mentoring assistant, provide advice for: ${situation}`;
-  
-  window.Android.generateText(prompt, (advice) => {
-    displayAdvice(advice);
-  });
 }
 ```
 
 ---
 
-## ⚠️ Common Issues
+## 📱 Alternative: Download Model from React App
 
-### Issue: `window.Android` is undefined
+If your React app has a Settings screen, add this component:
 
-**Fix:** You're either:
+```jsx
+// ModelDownloadButton.jsx
+import React, { useState } from 'react';
 
-- Not running on Android
-- WebView hasn't loaded yet
-- JavaScript is disabled
+function ModelDownloadButton() {
+    const [downloading, setDownloading] = useState(false);
+    const [progress, setProgress] = useState(0);
+
+    const handleDownload = () => {
+        if (!window.Android?.downloadModel) {
+            alert('Not running in Android app');
+            return;
+        }
+
+        setDownloading(true);
+        window.Android.downloadModel(
+            'tinyllama-1.1b',
+            (prog) => setProgress(prog),
+            (success) => {
+                setDownloading(false);
+                alert(success ? 'Model downloaded!' : 'Download failed');
+            }
+        );
+    };
+
+    return (
+        <div style={{ padding: '20px' }}>
+            <h3>Download AI Model</h3>
+            <p>Required for course generation</p>
+            
+            {!downloading ? (
+                <button 
+                    onClick={handleDownload}
+                    style={{
+                        padding: '10px 20px',
+                        fontSize: '16px',
+                        background: '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Download TinyLlama (637 MB)
+                </button>
+            ) : (
+                <div>
+                    <p>Downloading: {progress}%</p>
+                    <progress 
+                        value={progress} 
+                        max="100" 
+                        style={{ width: '100%', height: '30px' }}
+                    />
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default ModelDownloadButton;
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Issue: "No downloaded models available"
+
+**Solution:** Follow Step 3 above to download a model
+
+### Issue: Model download stuck at 0%
+
+**Check:**
+
+- Internet connection
+- Available storage (need ~1 GB free)
+- App storage permissions
+
+**Debug:**
+
+```bash
+adb logcat | grep "AIManager\|RunAnywhere\|WebAppInterface"
+```
+
+### Issue: Generation takes too long
+
+**Normal:** TinyLlama takes 10-30 seconds
+**If longer:**
+
+- Try reloading the model
+- Check CPU usage
+- Try restarting the app
+
+### Issue: "window.Android is undefined"
 
 **Solution:**
 
-```javascript
-// Wait for window to load
-window.addEventListener('load', () => {
-  if (window.Android) {
-    // Now safe to use
-  }
-});
+- Make sure you're running in the Android app, not a web browser
+- Check WebView debugging is enabled
+
+---
+
+## 📊 What Happens Behind the Scenes
+
 ```
-
-### Issue: Model download fails
-
-**Fix:**
-
-- Check internet connection
-- Ensure INTERNET permission
-- Verify storage space
-
-### Issue: Model load fails
-
-**Fix:**
-
-- Ensure model is fully downloaded
-- Check device has enough RAM
-- Try smaller model (SmolLM2 360M)
-
----
-
-## 🎯 Next Steps
-
-1. **✅ Build & Run** - Get the app running on your device
-2. **✅ Test AI Bridge** - Verify `window.Android` is available
-3. **✅ Download a Model** - Start with SmolLM2 360M (119 MB)
-4. **✅ Generate First Response** - Test AI with a simple prompt
-5. **✅ Build Your Feature** - Integrate AI into your mentoring app
-
----
-
-## 🆘 Need Help?
-
-1. **Check Documentation** - [AI_INTEGRATION_GUIDE.md](AI_INTEGRATION_GUIDE.md)
-2. **Review Examples** - See code examples above
-3. **Check Logs** - Android Studio Logcat for errors
-4. **SDK Issues** - https://github.com/RunanywhereAI/runanywhere-sdks/issues
-
----
-
-## 📊 Quick Reference
-
-### Available AI Models
-
-| Model | Size | Speed | Quality |
-|-------|------|-------|---------|
-| SmolLM2 360M | 119 MB | Fast | Basic |
-| Qwen 2.5 0.5B | 374 MB | Medium | Good |
-| Llama 3.2 1B | 815 MB | Slow | Best |
-
-### JavaScript Bridge Methods
-
-```javascript
-// Model Management
-window.Android.getAvailableModels(callback)
-window.Android.downloadModel(id, progressCb, completeCb)
-window.Android.loadModel(id, callback)
-window.Android.unloadModel(callback)
-
-// AI Generation
-window.Android.generateText(prompt, callback)
-window.Android.generateTextStream(prompt, tokenCb, completeCb)
-window.Android.chat(message, callback)
-
-// Status
-window.Android.isModelLoaded(callback)
-window.Android.getCurrentModel(callback)
-
-// Utilities
-window.Android.showToast(message)
-window.Android.getDeviceInfo()
-window.Android.isAndroid()
+User clicks "Generate Content"
+    ↓
+Android Bridge intercepts request
+    ↓
+WebAppInterface.generateCourseContent() called
+    ↓
+1. Extract website content (if URL provided)
+    ↓
+2. Check if model loaded
+    ↓
+3. Load model if needed (auto-loads first downloaded model)
+    ↓
+4. Create structured prompt with course info + content
+    ↓
+5. Call RunAnywhere SDK: aiManager.generateText(prompt)
+    ↓
+6. Parse AI response (try JSON, fallback to structured)
+    ↓
+7. Return course structure to frontend
+    ↓
+UI displays generated course!
 ```
 
 ---
 
-**Ready to build?** 🚀
+## 📚 Documentation Files
 
+- **`MODEL_DOWNLOAD_GUIDE.md`** - Detailed guide on downloading and managing models
+- **`AI_COURSE_GENERATION.md`** - Technical documentation of the feature
+- **`SETUP_SUMMARY.md`** - Implementation summary and testing instructions
+- **`QUICK_START.md`** - This file
+
+---
+
+## ✅ Success Checklist
+
+- [ ] App built and installed
+- [ ] WebView debugging enabled
+- [ ] Chrome DevTools connected
+- [ ] At least one model downloaded
+- [ ] Model download verified (isDownloaded: true)
+- [ ] Course generation tested
+- [ ] Generated course has lessons and topics
+
+---
+
+## 🎉 You're Ready!
+
+Once you complete the steps above, your AI course generation feature is fully functional! Users can:
+
+1. Enter a website URL or course topic
+2. Provide course details (difficulty, audience, etc.)
+3. Click "Generate Content"
+4. Get a complete course structure with lessons and topics
+5. All processing happens **on-device** - no server required!
+
+Need help? Check the other documentation files or the logs:
 ```bash
-./gradlew installDebug && adb logcat -s MentoraApp:I AIManager:I
+adb logcat | grep -E "WebAppInterface|AIManager|AndroidBridge"
 ```
-
-This will build, install, and show AI-related logs.
-
----
-
-**Last Updated:** November 2024  
-**Status:** ✅ Ready for Development  
-**RunAnywhere SDK:** v0.1.3-alpha

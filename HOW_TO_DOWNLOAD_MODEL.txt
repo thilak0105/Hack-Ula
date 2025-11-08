@@ -1,0 +1,270 @@
+╔═══════════════════════════════════════════════════════════════════════╗
+║           HOW TO DOWNLOAD AI MODEL - STEP BY STEP                    ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+📱 YOUR APP IS RUNNING ON DEVICE RIGHT NOW\!
+
+═══════════════════════════════════════════════════════════════════════
+
+METHOD 1: USING CHROME DEVTOOLS (EASIEST - RECOMMENDED)
+
+Step 1: CONNECT CHROME DEVTOOLS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Make sure your device is connected via USB
+2. On your COMPUTER, open Google Chrome browser
+3. In Chrome address bar, type: chrome://inspect
+4. Press Enter
+5. You'll see a page titled "Inspect with Chrome DevTools"
+6. Wait a few seconds for devices to appear
+7. Look for "Mentora Mobile" or "com.mentora.mobile"
+8. Click the blue "inspect" button next to it
+
+✅ This opens Chrome DevTools connected to your app\!
+
+Step 2: CHECK AVAILABLE MODELS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+In the DevTools Console (bottom panel), copy and paste this:
+
+window.Android.getAvailableModels(function(models) {
+    const modelList = JSON.parse(models);
+    console.log('=== AVAILABLE MODELS ===');
+    modelList.forEach(function(model) {
+        console.log('');
+        console.log('Name:', model.name);
+        console.log('ID:', model.id);
+        console.log('Size:', model.sizeInMB, 'MB');
+        console.log('Downloaded:', model.isDownloaded ? '✅ YES' : '❌ NO');
+    });
+});
+
+Press ENTER
+
+You'll see something like:
+
+=== AVAILABLE MODELS ===
+
+Name: TinyLlama 1.1B
+ID: tinyllama-1.1b
+Size: 637.00 MB
+Downloaded: ❌ NO
+
+Name: Phi-2 2.7B
+ID: phi-2-2.7b
+Size: 1680.00 MB
+Downloaded: ❌ NO
+
+Step 3: DOWNLOAD A MODEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Copy and paste this command (downloads TinyLlama - smallest & fastest):
+
+window.Android.downloadModel(
+    'tinyllama-1.1b',
+    function(progress) {
+        console.log('⬇️ Downloading:', progress + '%');
+    },
+    function(success) {
+        console.log(success ? '✅ DOWNLOAD COMPLETE\!' : '❌ Download failed');
+    }
+);
+
+Press ENTER
+
+You'll see:
+⬇️ Downloading: 0%
+⬇️ Downloading: 1%
+⬇️ Downloading: 2%
+...
+⬇️ Downloading: 100%
+✅ DOWNLOAD COMPLETE\!
+
+⏱️  WAIT TIME: 2-5 minutes (depending on internet speed)
+
+Step 4: VERIFY DOWNLOAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+After download completes, check again:
+
+window.Android.getAvailableModels(function(models) {
+    JSON.parse(models).forEach(function(m) {
+        console.log(m.name + ':', m.isDownloaded ? '✅ Downloaded' : '❌ Not downloaded');
+    });
+});
+
+You should see:
+TinyLlama 1.1B: ✅ Downloaded
+
+✅ NOW YOU'RE READY TO GENERATE COURSES\!
+
+═══════════════════════════════════════════════════════════════════════
+
+METHOD 2: IF CHROME DEVTOOLS DOESN'T SHOW YOUR DEVICE
+
+If you don't see your device in chrome://inspect:
+
+1. Enable USB Debugging on Android:
+   Settings → About Phone → Tap "Build Number" 7 times
+   Settings → Developer Options → Enable "USB Debugging"
+
+2. Accept the USB debugging prompt on your phone
+
+3. Check device is connected:
+   adb devices
+
+   Should show:
+   List of devices attached
+   1ccbcfc6        device
+
+4. Try chrome://inspect again
+
+═══════════════════════════════════════════════════════════════════════
+
+METHOD 3: USING ADB COMMANDS (ALTERNATIVE)
+
+If Chrome DevTools isn't working, use these commands in terminal:
+
+# Start the app
+adb shell am start -n com.mentora.mobile/.MainActivity
+
+# Check logcat for any issues
+adb logcat | grep -E "RunAnywhere|AIManager"
+
+═══════════════════════════════════════════════════════════════════════
+
+RECOMMENDED MODELS TO DOWNLOAD:
+
+1. TinyLlama 1.1B (RECOMMENDED FOR FIRST TIME)
+   • Size: 637 MB
+   • Speed: Very fast
+   • Quality: Good for testing
+   • ID: tinyllama-1.1b
+   • Download time: 2-5 minutes
+
+2. Phi-2 2.7B (BETTER QUALITY)
+   • Size: 1.68 GB
+   • Speed: Moderate
+   • Quality: Better results
+   • ID: phi-2-2.7b
+   • Download time: 5-10 minutes
+
+START WITH TINYLLAMA - IT'S FASTER AND WORKS GREAT\!
+
+═══════════════════════════════════════════════════════════════════════
+
+COPY-PASTE COMMANDS (ALL IN ONE):
+
+Step 1: Check models
+───────────────────
+window.Android.getAvailableModels(m => console.log(JSON.parse(m)));
+
+Step 2: Download TinyLlama
+───────────────────────────
+window.Android.downloadModel('tinyllama-1.1b', p => console.log(p + '%'), s => console.log('Done:', s));
+
+Step 3: Verify
+──────────────
+window.Android.getAvailableModels(m => JSON.parse(m).forEach(x => console.log(x.name, x.isDownloaded ? '✅' : '❌')));
+
+Step 4: Test generation
+───────────────────────
+window.Android.generateCourseContent('', '', 'Test Course', 'Beginner', 'Students', 'None', r => console.log('Result:', r));
+
+═══════════════════════════════════════════════════════════════════════
+
+VISUAL GUIDE:
+
+Chrome DevTools:
+┌─────────────────────────────────────────────────┐
+│ chrome://inspect                                │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│ Devices                                         │
+│                                                 │
+│ ▼ Pixel 5 (1ccbcfc6)                          │
+│   ├─ Chrome (tabs)                             │
+│   └─ WebView in com.mentora.mobile             │
+│      Mentora Mobile                             │
+│      [inspect] ← CLICK THIS                    │
+│                                                 │
+└─────────────────────────────────────────────────┘
+
+After clicking inspect:
+┌─────────────────────────────────────────────────┐
+│ Elements | Console | Sources | Network | ...   │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│ > window.Android.downloadModel('tinyllama...   │
+│   ⬇️ Downloading: 45%                          │
+│                                                 │
+│ Type commands here ↑                           │
+└─────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════
+
+TROUBLESHOOTING:
+
+❌ "window.Android is undefined"
+   → App not loaded yet. Wait a few seconds and try again.
+
+❌ "Device not showing in chrome://inspect"
+   → Check USB debugging is enabled
+   → Run: adb devices (should show your device)
+   → Reconnect USB cable
+
+❌ "Download stuck at 0%"
+   → Check internet connection
+   → Check storage space (need ~1 GB free)
+   → Try smaller model first
+
+❌ "Download failed"
+   → Check app permissions for storage
+   → Check available space
+   → Check internet connection
+   → View logs: adb logcat | grep RunAnywhere
+
+═══════════════════════════════════════════════════════════════════════
+
+✅ AFTER MODEL DOWNLOADS:
+
+You can immediately use the app:
+
+1. Enter website URL in the app
+2. Fill course details
+3. Click "Generate Content"
+4. Wait 10-60 seconds
+5. Course appears with modules and lessons\!
+
+═══════════════════════════════════════════════════════════════════════
+
+STORAGE REQUIREMENTS:
+
+App: ~20 MB ✅ Already installed
+TinyLlama: ~700 MB (recommended)
+Phi-2: ~2 GB (better quality)
+
+Make sure you have enough free space\!
+
+═══════════════════════════════════════════════════════════════════════
+
+QUICK START COMMANDS (COPY ALL AT ONCE):
+
+// Check what you have
+window.Android.getAvailableModels(m => {
+    JSON.parse(m).forEach(x => console.log(x.name, x.sizeInMB + 'MB', x.isDownloaded ? '✅' : '❌'));
+});
+
+// Download TinyLlama
+window.Android.downloadModel('tinyllama-1.1b', 
+    p => console.log('Progress:', p + '%'), 
+    s => console.log(s ? '✅ DONE\!' : '❌ FAILED')
+);
+
+═══════════════════════════════════════════════════════════════════════
+
+THAT'S IT\! 🎉
+
+1. Open chrome://inspect
+2. Click "inspect" on your app
+3. Paste download command
+4. Wait 2-5 minutes
+5. Start generating courses\!
+
+═══════════════════════════════════════════════════════════════════════

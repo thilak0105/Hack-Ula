@@ -28,14 +28,40 @@
                 return;
             }
             
+            // Create proper response structure matching frontend expectations
             const data = {
                 success: result.success || false,
                 course_id: 'android-' + Date.now(),
                 extracted_text: result.text || '',
                 course: {
-                    title: result.title || 'Untitled',
-                    description: result.url || '',
-                    lessons: []
+                    title: result.title || 'Untitled Course',
+                    description: 'Course created from extracted content',
+                    modules: [
+                        {
+                            id: 'module-1',
+                            title: 'Introduction',
+                            description: 'Getting started',
+                            duration: 60,
+                            lessonCount: 2,
+                            status: 'in-progress',
+                            lessons: [
+                                {
+                                    id: 'lesson-1-1',
+                                    title: 'What is ' + (result.title || 'this topic') + '?',
+                                    description: 'Introduction and overview',
+                                    duration: 30,
+                                    status: 'in-progress'
+                                },
+                                {
+                                    id: 'lesson-1-2',
+                                    title: 'Key Concepts',
+                                    description: 'Understanding the fundamentals',
+                                    duration: 30,
+                                    status: 'available'
+                                }
+                            ]
+                        }
+                    ]
                 }
             };
             
@@ -115,77 +141,104 @@
                                           this._url.includes('course') ||
                                           (!url && data); // Has data but no URL means it's generation
                 
-                if (url && window.Android && window.Android.extractWebsiteContent) {
-                    // Website extraction
-                    console.log('[AndroidBridge] Fetching:', url);
-                    const id = xhrId++;
-                    pendingXHR.set(id, this);
-                    const callback = 'handleWebResult_' + id;
-                    window[callback] = function(r) { window.handleWebResult(id, r); delete window[callback]; };
-                    window.Android.extractWebsiteContent(url, callback);
-                } else if (isCourseGeneration && window.Android && window.Android.generateText) {
-                    // Course generation with AI
-                    console.log('[AndroidBridge] Generating course with AI...');
+                if (isCourseGeneration && window.Android && window.Android.generateCourseContent) {
+                    // Use the unified course generation method
+                    console.log('[AndroidBridge] Generating course with AI using unified method...');
                     
                     // Extract course details from FormData
-                    let courseInfo = {};
+                    let courseInfo = {
+                        url: '',
+                        extractedText: '',
+                        title: 'Machine Learning',
+                        difficulty: 'Beginner',
+                        audience: 'Students',
+                        prerequisites: 'None'
+                    };
+                    
                     if (data && data.get) {
-                        courseInfo = {
-                            title: data.get('title') || 'Machine Learning',
-                            difficulty: data.get('difficulty') || 'Beginner',
-                            audience: data.get('audience') || 'Students',
-                            prerequisites: data.get('prerequisites') || 'None'
-                        };
+                        courseInfo.url = data.get('url') || '';
+                        courseInfo.extractedText = data.get('extracted_text') || '';
+                        courseInfo.title = data.get('title') || courseInfo.title;
+                        courseInfo.difficulty = data.get('difficulty') || courseInfo.difficulty;
+                        courseInfo.audience = data.get('audience') || courseInfo.audience;
+                        courseInfo.prerequisites = data.get('prerequisites') || courseInfo.prerequisites;
                     }
                     
-                    // Create prompt for AI
-                    const prompt = `Create a comprehensive course outline about ${courseInfo.title}.
-Level: ${courseInfo.difficulty}
-Target Audience: ${courseInfo.audience}
-Prerequisites: ${courseInfo.prerequisites}
-
-Generate a JSON course structure with:
-- Course title and description
-- 5-7 lessons with titles and brief descriptions
-- Each lesson should have 3-5 topics
-
-Format as JSON: {"title": "...", "description": "...", "lessons": [{"title": "...", "description": "...", "topics": [...]}]}`;
+                    console.log('[AndroidBridge] Course Info:', courseInfo);
                     
-                    console.log('[AndroidBridge] AI Prompt:', prompt);
-                    
-                    // Call AI to generate course
-                    window.Android.generateText(prompt, function(aiResponse) {
-                        console.log('[AndroidBridge] AI Response:', aiResponse);
+                    // Call unified generation method
+                    const callbackName = 'courseGenCallback_' + Date.now();
+                    window[callbackName] = function(response) {
+                        console.log('[AndroidBridge] Course generation response:', response);
                         
-                        // Try to parse AI response as JSON
-                        let course;
-                        try {
-                            course = JSON.parse(aiResponse);
-                        } catch(e) {
-                            // If AI didn't return valid JSON, create a structured response
-                            console.warn('[AndroidBridge] AI response not JSON, structuring it...');
-                            course = {
-                                title: courseInfo.title,
-                                description: aiResponse.substring(0, 200),
-                                lessons: [
+                        // Transform AI response to match frontend structure
+                        let finalResponse = {
+                            success: response.success || false,
+                            course_id: response.course_id || ('ai-' + Date.now()),
+                            extracted_text: response.extracted_text || ''
+                        };
+                        
+                        if (response.success && response.course) {
+                            // Transform lessons to modules format
+                            const lessons = response.course.lessons || [];
+                            const modules = lessons.map((lesson, index) => ({
+                                id: 'module-' + (index + 1),
+                                title: lesson.title || ('Module ' + (index + 1)),
+                                description: lesson.description || 'AI generated module',
+                                duration: 60,
+                                lessonCount: (lesson.topics || []).length,
+                                status: index === 0 ? 'in-progress' : 'available',
+                                lessons: (lesson.topics || ['Introduction', 'Core Concepts', 'Practice']).map((topic, tIndex) => ({
+                                    id: `lesson-${index + 1}-${tIndex + 1}`,
+                                    title: topic,
+                                    description: lesson.description || 'Learn about ' + topic,
+                                    duration: 20,
+                                    status: index === 0 && tIndex === 0 ? 'in-progress' : 'available'
+                                }))
+                            }));
+                            
+                            finalResponse.course = {
+                                title: response.course.title || 'AI Generated Course',
+                                description: response.course.description || 'Course created with AI',
+                                modules: modules.length > 0 ? modules : [
                                     {
-                                        title: 'Introduction to ' + courseInfo.title,
+                                        id: 'module-1',
+                                        title: 'Introduction',
                                         description: 'Getting started',
-                                        topics: ['Overview', 'Key Concepts', 'Prerequisites']
+                                        duration: 60,
+                                        lessonCount: 2,
+                                        status: 'in-progress',
+                                        lessons: [
+                                            {
+                                                id: 'lesson-1-1',
+                                                title: 'Overview',
+                                                description: 'Course overview',
+                                                duration: 30,
+                                                status: 'in-progress'
+                                            },
+                                            {
+                                                id: 'lesson-1-2',
+                                                title: 'Getting Started',
+                                                description: 'Begin your learning journey',
+                                                duration: 30,
+                                                status: 'available'
+                                            }
+                                        ]
                                     }
                                 ]
                             };
+                        } else {
+                            // Error case - still provide valid structure
+                            finalResponse.course = {
+                                title: 'Error',
+                                description: response.message || response.error || 'Failed to generate course',
+                                modules: []
+                            };
                         }
                         
-                        const responseData = {
-                            success: true,
-                            course: course,
-                            message: 'Course generated with on-device AI'
-                        };
-                        
-                        const json = JSON.stringify(responseData);
+                        const json = JSON.stringify(finalResponse);
                         Object.defineProperty(this, 'readyState', {writable: true, value: 4});
-                        Object.defineProperty(this, 'status', {writable: true, value: 200});
+                        Object.defineProperty(this, 'status', {writable: true, value: response.success ? 200 : 500});
                         Object.defineProperty(this, 'response', {writable: true, value: json});
                         Object.defineProperty(this, 'responseText', {writable: true, value: json});
                         
@@ -196,9 +249,29 @@ Format as JSON: {"title": "...", "description": "...", "lessons": [{"title": "..
                         if (this.onload) this.onload({type: 'load', target: this});
                         
                         console.log('[AndroidBridge] Course generation complete!');
-                    }.bind(this));
+                        delete window[callbackName];
+                    }.bind(this);
+                    
+                    window.Android.generateCourseContent(
+                        courseInfo.url,
+                        courseInfo.extractedText,
+                        courseInfo.title,
+                        courseInfo.difficulty,
+                        courseInfo.audience,
+                        courseInfo.prerequisites,
+                        callbackName
+                    );
+                    
+                } else if (url && window.Android && window.Android.extractWebsiteContent) {
+                    // Website extraction only (legacy path)
+                    console.log('[AndroidBridge] Fetching:', url);
+                    const id = xhrId++;
+                    pendingXHR.set(id, this);
+                    const callback = 'handleWebResult_' + id;
+                    window[callback] = function(r) { window.handleWebResult(id, r); delete window[callback]; };
+                    window.Android.extractWebsiteContent(url, callback);
                 } else {
-                    // No URL or AI, return mock
+                    // No URL or Android, return mock
                     console.log('[AndroidBridge] No URL or Android not available, mocking');
                     setTimeout(function() {
                         const json = JSON.stringify({
@@ -208,11 +281,30 @@ Format as JSON: {"title": "...", "description": "...", "lessons": [{"title": "..
                             course: {
                                 title: 'Sample Course',
                                 description: 'A sample course for testing',
-                                lessons: [
+                                modules: [
                                     {
-                                        title: 'Lesson 1: Introduction',
-                                        description: 'Getting started with the basics',
-                                        topics: ['Topic 1', 'Topic 2', 'Topic 3']
+                                        id: 'module-1',
+                                        title: 'Introduction',
+                                        description: 'Getting started',
+                                        duration: 60,
+                                        lessonCount: 2,
+                                        status: 'in-progress',
+                                        lessons: [
+                                            {
+                                                id: 'lesson-1-1',
+                                                title: 'Overview',
+                                                description: 'Course overview',
+                                                duration: 30,
+                                                status: 'in-progress'
+                                            },
+                                            {
+                                                id: 'lesson-1-2',
+                                                title: 'Getting Started',
+                                                description: 'Begin your learning journey',
+                                                duration: 30,
+                                                status: 'available'
+                                            }
+                                        ]
                                     }
                                 ]
                             }

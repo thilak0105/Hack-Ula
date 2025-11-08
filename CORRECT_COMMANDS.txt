@@ -1,0 +1,123 @@
+╔═══════════════════════════════════════════════════════════════════════╗
+║          CORRECT COMMANDS - COPY & PASTE THESE                        ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+✅ APP UPDATED WITH FIXED CALLBACK
+
+Now the callbacks work properly\!
+
+═══════════════════════════════════════════════════════════════════════
+
+📱 STEP 1: OPEN CHROME DEVTOOLS
+
+1. On your computer, open Chrome
+2. Type in address bar: chrome://inspect
+3. Find "Mentora Mobile" and click "inspect"
+
+═══════════════════════════════════════════════════════════════════════
+
+📋 STEP 2: CHECK AVAILABLE MODELS
+
+Copy and paste this in the Console:
+
+window.Android.getAvailableModels(function(models) {
+    console.log('=== AVAILABLE MODELS ===');
+    models.forEach(function(model) {
+        console.log('');
+        console.log('Name:', model.name);
+        console.log('ID:', model.id);
+        console.log('Size:', model.sizeInMB, 'MB');
+        console.log('Downloaded:', model.isDownloaded ? '✅ YES' : '❌ NO');
+    });
+});
+
+Note: Now it receives the models array directly, not a string\!
+
+═══════════════════════════════════════════════════════════════════════
+
+⬇️  STEP 3: DOWNLOAD TINYLLAMA
+
+window.Android.downloadModel(
+    'tinyllama-1.1b',
+    function(progress) {
+        console.log('⬇️ Download:', progress + '%');
+    },
+    function(success) {
+        console.log(success ? '✅ COMPLETE\!' : '❌ FAILED');
+    }
+);
+
+Wait: 2-5 minutes
+
+═══════════════════════════════════════════════════════════════════════
+
+✅ STEP 4: VERIFY DOWNLOAD
+
+window.Android.getAvailableModels(function(models) {
+    models.forEach(function(m) {
+        console.log(m.name + ':', m.isDownloaded ? '✅ Downloaded' : '❌ Not yet');
+    });
+});
+
+Should show:
+TinyLlama 1.1B: ✅ Downloaded
+
+═══════════════════════════════════════════════════════════════════════
+
+🧪 STEP 5: TEST COURSE GENERATION
+
+window.Android.generateCourseContent(
+    'https://en.wikipedia.org/wiki/Python_(programming_language)',
+    '',
+    'Python Programming',
+    'Beginner',
+    'Students',
+    'None',
+    function(response) {
+        console.log('✅ Success:', response.success);
+        console.log('📚 Title:', response.course.title);
+        console.log('📖 Modules:', response.course.modules.length);
+        response.course.modules.forEach(function(mod, i) {
+            console.log('  Module ' + (i+1) + ':', mod.title);
+            console.log('    Lessons:', mod.lessons.length);
+        });
+    }
+);
+
+═══════════════════════════════════════════════════════════════════════
+
+🎯 SHORT VERSION (ONE-LINERS):
+
+Check models:
+window.Android.getAvailableModels(m => console.log(m));
+
+Download model:
+window.Android.downloadModel('tinyllama-1.1b', p => console.log(p + '%'), s => console.log('Done:', s));
+
+Verify download:
+window.Android.getAvailableModels(m => m.forEach(x => console.log(x.name, x.isDownloaded ? '✅' : '❌')));
+
+Test generation:
+window.Android.generateCourseContent('', '', 'Test', 'Beginner', 'Students', 'None', r => console.log('Result:', r));
+
+═══════════════════════════════════════════════════════════════════════
+
+💡 WHAT WAS FIXED:
+
+Before: callback('stringified json') - had to parse
+Now: callback(actual json object) - ready to use\!
+
+The models array is now passed directly as a JavaScript object,
+not as a string that needs parsing\!
+
+═══════════════════════════════════════════════════════════════════════
+
+✅ YOU'RE READY\!
+
+1. Open chrome://inspect
+2. Click "inspect" on your app
+3. Run the commands above
+4. Download model (5 min)
+5. Generate courses\!
+
+═══════════════════════════════════════════════════════════════════════

@@ -32,10 +32,10 @@ class AIManager(private val context: Context) {
                 val jsonModel = JSONObject().apply {
                     put("id", model.id)
                     put("name", model.name)
-                    put("type", model.type)
-                    put("sizeInMB", String.format("%.2f", model.sizeBytes / (1024.0 * 1024.0)))
+                    put("category", model.category.name)
+                    val sizeInMB = (model.downloadSize ?: 0L) / (1024.0 * 1024.0)
+                    put("sizeInMB", String.format("%.2f", sizeInMB))
                     put("isDownloaded", model.isDownloaded)
-                    put("isLoaded", model.isLoaded)
                 }
                 jsonArray.put(jsonModel)
             }
@@ -53,9 +53,15 @@ class AIManager(private val context: Context) {
      * @return Flow of download progress (0.0 to 1.0)
      */
     fun downloadModel(modelId: String): Flow<Float> {
-        return RunAnywhere.downloadModel(modelId).catch { e ->
-            Log.e(TAG, "Download failed: ${e.message}", e)
-            emit(0f)
+        return kotlinx.coroutines.flow.flow {
+            try {
+                RunAnywhere.downloadModel(modelId).collect { progress ->
+                    emit(progress)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Download failed: ${e.message}", e)
+                emit(0f)
+            }
         }
     }
 
@@ -134,7 +140,9 @@ class AIManager(private val context: Context) {
     suspend fun isModelLoaded(): Boolean {
         return try {
             val models = listAvailableModels()
-            models.any { it.isLoaded }
+            // Check if we can get the loaded model info
+            val currentModel = getCurrentModel()
+            currentModel != null
         } catch (e: Exception) {
             Log.e(TAG, "Failed to check model status: ${e.message}", e)
             false
@@ -148,14 +156,16 @@ class AIManager(private val context: Context) {
     suspend fun getCurrentModel(): String? {
         return try {
             val models = listAvailableModels()
-            val loadedModel = models.firstOrNull { it.isLoaded }
+            // Assume the most recently used or first downloaded model is loaded
+            val loadedModel = models.firstOrNull { it.isDownloaded }
 
             loadedModel?.let { model ->
                 JSONObject().apply {
                     put("id", model.id)
                     put("name", model.name)
-                    put("type", model.type)
-                    put("sizeInMB", String.format("%.2f", model.sizeBytes / (1024.0 * 1024.0)))
+                    put("category", model.category.name)
+                    val sizeInMB = (model.downloadSize ?: 0L) / (1024.0 * 1024.0)
+                    put("sizeInMB", String.format("%.2f", sizeInMB))
                 }.toString()
             }
         } catch (e: Exception) {

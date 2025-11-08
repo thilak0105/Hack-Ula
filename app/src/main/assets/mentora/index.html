@@ -927,12 +927,11 @@
                 
                 // Show success and navigate
                 setTimeout(() => {
-                    alert('✅ Course generated successfully!');
                     navigateTo('courses');
                     document.getElementById('courseForm').reset();
                     document.getElementById('generationStatus').style.display = 'none';
                     document.getElementById('generateBtn').disabled = false;
-                }, 1000);
+                }, 500);
                 
             } else {
                 // Fallback for testing without Android
@@ -1014,12 +1013,11 @@
                 saveCourse(mockCourse);
                 
                 setTimeout(() => {
-                    alert('⚠️ AI model not ready. Generated course with sample structure.\n\nTo use AI: Download the model first from the settings.');
                     navigateTo('courses');
                     document.getElementById('courseForm').reset();
                     document.getElementById('generationStatus').style.display = 'none';
                     document.getElementById('generateBtn').disabled = false;
-                }, 1000);
+                }, 500);
             } else {
                 // Show error
                 alert('❌ Failed to generate course: ' + error.message);
@@ -1159,8 +1157,8 @@
             <div class="card" style="text-align: center;">
                 <h3 class="card-title mb-2">🎯 Ready to Start?</h3>
                 <p style="color: var(--gray); margin-bottom: 16px;">Begin your learning journey with this course</p>
-                <button class="btn btn-primary" onclick="alert('Lesson viewer coming soon!')">
-                    <span>▶️</span> Start First Lesson
+                <button class="btn btn-primary" onclick="navigateTo('courses')">
+                    <span>←</span> Back to Courses
                 </button>
             </div>
         `;

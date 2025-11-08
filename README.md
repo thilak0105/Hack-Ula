@@ -2,14 +2,14 @@
 
 A modern Android application for Mentora, built with Kotlin and featuring:
 
-- **WebView-based interface** that loads a React web application locally
+- **New UI** that loads a React web application locally
 - **On-device AI capabilities** powered by RunAnywhere SDK
 - **Privacy-first architecture** - all AI processing happens on-device
 - **Offline-capable** - works without internet after initial model download
 
 ## 🚀 Features
 
-- **WebView Integration**: Displays React web application in a native Android WebView
+- **New UI**: Displays React web application in a native Android UI
 - **On-Device AI**: Run AI models directly on the device (SmolLM2, Qwen, Llama)
 - **Kotlin**: Modern, concise, and safe programming language
 - **Material Design**: Clean and modern UI following Material Design guidelines
@@ -31,7 +31,7 @@ MentoraMobile/
 │           ├── assets/
 │           │   └── mentora/           # React web app assets
 │           ├── java/com/mentora/mobile/
-│           │   ├── MainActivity.kt        # Main activity with WebView
+│           │   ├── MainActivity.kt        # Main activity with New UI
 │           │   ├── SplashActivity.kt      # Splash screen activity
 │           │   ├── MentoraApplication.kt  # Application class (initializes AI SDK)
 │           │   ├── WebAppInterface.kt     # JavaScript bridge interface (includes AI methods)
@@ -144,8 +144,10 @@ if (window.Android) {
 ## 📱 Key Components
 
 ### MainActivity.kt
-The main activity that hosts the WebView displaying the React application. Features:
-- Configures WebView settings for optimal performance
+
+The main activity that hosts the New UI displaying the React application. Features:
+
+- Configures UI settings for optimal performance
 - Handles back button navigation
 - Implements JavaScript bridge for native-web communication
 - Registers AI interface for on-device inference
@@ -267,7 +269,7 @@ The app requires the following permissions:
 
 - **100% On-Device AI**: All AI processing happens locally
 - **No Data Transmission**: User prompts never leave the device
-- **Offline Capable**: Works without internet after model download
+- **Offline Capable**: Works completely offline after model download
 - **JavaScript Interface Security**: Uses `@JavascriptInterface` annotation
 - **WebView Security**: Configured with appropriate security settings
 

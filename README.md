@@ -1,4 +1,4 @@
-# MentoraMobile - Android Application with On-Device AI
+# Mentora Mobile - Android Application with On-Device AI
 
 A modern Android application for Mentora, built with Kotlin and featuring:
 
